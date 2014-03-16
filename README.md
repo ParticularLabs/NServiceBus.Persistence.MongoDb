@@ -8,7 +8,6 @@ This is experimental and has not been put into production use.
 
 ### TODO
 * Timeout Persistence
-* Subscription Persistence
 
 ### Requirements
 To use the saga persister, your IContainsSagaData requires a property that has the `[DocumentVersion]` attribute. A property containing the `[Unique]` attribute is also recommended.  Example:
@@ -29,14 +28,22 @@ public class MySagaData : IContainSagaData
     public string OriginalMessageId { get; set; }
 }
 ```
+### Installation
+There are two ways:
+* Grab the source and compile it yourself :-)
+* Install the NuGet Package `NServiceBus.Persistence.MongoDb` by typing in the Package Manager Console: 
+  ```
+  Install-Package NServiceBus.Persistence.MongoDb
+  ```
 
 ### Usage
 To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  
 
-| Method                 | Documentation                                                                                                                                            |
-|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.MongoDbPersistence()` | Configures the MongoDB database connection. With no arguments, it automatically uses the connectionString with the name `NServiceBus/Persistence/MongoDB.` |
-| `.MongoSagaPersister()` | Enables Saga Persister.                                                                                                                                  |
+| Method                          | Documentation                                                                                                                                               |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.MongoDbPersistence()`         | Configures the MongoDB database connection. With no arguments, it automatically uses the connectionString with the name `NServiceBus/Persistence/MongoDB.`  |
+| `.MongoDbSagaPersister()`       | Enables Saga Persister.                                                                                                                                     |
+| `.MongoDbSubscriptionStorage()` | Enables Subscription Storage                                                                                                                                |
 
 ### Example configuration:
 ```csharp
@@ -53,7 +60,7 @@ namespace Example
                     .DefaultBuilder()
                     .MongoDbPersistence()
                     .MongoSagaPersister()
-                    .InMemorySubscriptionStorage()
+                    .MongoDbSubscriptionStorage()
                     .UseInMemoryTimeoutPersister();
         }
     }

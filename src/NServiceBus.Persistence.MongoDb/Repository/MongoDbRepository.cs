@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using NServiceBus.Persistence.MongoDB.Exceptions;
 using NServiceBus.Saga;
 
 namespace NServiceBus.Persistence.MongoDB.Repository
@@ -52,21 +53,11 @@ namespace NServiceBus.Persistence.MongoDB.Repository
                 update.Set(field.Name, field.Value);
             }
 
-            try
+            var modifyResult = collection.FindAndModify(query, SortBy.Null, update, true, false);
+            if (modifyResult.ModifiedDocument == null)
             {
-                var modifyResult = collection.FindAndModify(query, SortBy.Null, update, true, false);
-                if (modifyResult.ModifiedDocument == null)
-                {
-                    throw new Exception(String.Format("Concurrency issue.  Version expected = {0}", version));
-                }
+                throw new SagaMongoDbConcurrentUpdateException(version);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                throw;
-
-            }
-            
         }
 
         public void Remove(IContainSagaData saga)

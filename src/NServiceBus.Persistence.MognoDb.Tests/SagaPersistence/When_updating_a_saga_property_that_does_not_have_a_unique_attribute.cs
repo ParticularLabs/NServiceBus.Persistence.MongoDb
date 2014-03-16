@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using NServiceBus.Persistence.MongoDB.Exceptions;
 using NServiceBus.Persistence.MongoDB.SagaPersistence;
 using NUnit.Framework;
 
@@ -48,7 +49,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
 
         [Test]
-        [ExpectedException(typeof(MongoCommandException))]
+        [ExpectedException(typeof(SagaMongoDbConcurrentUpdateException))]
         public void It_should_throw_when_version_changed()
         {
             var saga1 = new SagaWithoutUniqueProperties()

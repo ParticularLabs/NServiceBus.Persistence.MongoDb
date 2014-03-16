@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3B39C103-9D66-490C-AF20-CDC976F80F90}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NServiceBus.Persistence.MognoDb.Tests</RootNamespace>
+    <AssemblyName>NServiceBus.Persistence.MognoDb.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MongoDB.Bson">
+      <HintPath>..\packages\mongocsharpdriver.1.8.3\lib\net35\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver">
+      <HintPath>..\packages\mongocsharpdriver.1.8.3\lib\net35\MongoDB.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus">
+      <HintPath>..\packages\NServiceBus.Interfaces.4.4.2\lib\net40\NServiceBus.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Core">
+      <HintPath>..\packages\NServiceBus.4.4.2\lib\net40\NServiceBus.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration\When_configuring_persistence_to_use_a_mongo_server_instance_using_a_connection_string.cs" />
+    <Compile Include="Configuration\When_configuring_persistence_to_use_a_mongo_server_instance_using_a_connection_string_lambda.cs" />
+    <Compile Include="Configuration\When_configuring_persistence_to_use_a_mongo_server_instance_using_a_connection_string_that_does_not_exist.cs" />
+    <Compile Include="Configuration\When_configuring_persistence_to_use_a_mongo_server_instance_with_the_default_settings.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SagaPersistence\EqualityExtensions.cs" />
+    <Compile Include="SagaPersistence\MongoFixture.cs" />
+    <Compile Include="SagaPersistence\TestSaga.cs" />
+    <Compile Include="SagaPersistence\When_completing_a_saga_with_the_mongo_persister.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_inherited_property.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_related_entities.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_another_saga.cs" />
+    <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
+    <Compile Include="SagaPersistence\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj">
+      <Project>{b34dde97-b5f7-4fde-8144-ce0a5c886947}</Project>
+      <Name>NServiceBus.Persistence.MongoDb</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

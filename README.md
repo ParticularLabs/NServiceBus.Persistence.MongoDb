@@ -6,8 +6,8 @@ MongoDb Persistence for NServiceBus Sagas.  It handles concurrency using a docum
 ### Not for production use
 This is experimental and has not been put into production use.
 
-### Todo
-Timeouts Persistence 
+### TODO
+NServiceBus Timeout Persistence 
 
 ### Requirements
 To use the saga persister, your IContainsSagaData requires a property that has the `[DocumentVersion]` attribute. A property containing the `[Unique]` attribute is also recommended.  Example:
@@ -29,7 +29,7 @@ public class MySagaData : IContainSagaData
 }
 ```
 
-### About
+### Handling Concurrency With MongoDb
 Sagas are a great feature of NServiceBus.  The key concurrency safeguards that sagas guarantee (see: http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency) depend heavily on the underlying data store.  The two specific cases that NServiceBus relies on the underling data store are [concurrent access to non-existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-non-existing-saga-instances) and [concurrent access to existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-existing-saga-instances).
 
 #### Concurrent access to non-existing saga instances

@@ -1,13 +1,14 @@
 NServiceBus.Persistence.MongoDb
 ===============================
 
-MongoDb Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.  
+MongoDB Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.  
 
 ### Not for production use
 This is experimental and has not been put into production use.
 
 ### TODO
-NServiceBus Timeout Persistence 
+* Timeout Persistence
+* Subscription Persistence
 
 ### Requirements
 To use the saga persister, your IContainsSagaData requires a property that has the `[DocumentVersion]` attribute. A property containing the `[Unique]` attribute is also recommended.  Example:
@@ -26,6 +27,36 @@ public class MySagaData : IContainSagaData
     public Guid Id { get; set; }
     public string Originator { get; set; }
     public string OriginalMessageId { get; set; }
+}
+```
+
+### Usage
+To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  
+
+| Method                 | Documentation                                                                                                                                            |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.MongoDbPersistence()` | Configures the MongoDB database connection. With no arguments, it automatically uses the connectionString with the name `NServiceBus/Persistence/MongoDB.` |
+| `.MongoSagaPersister()` | Enables Saga Persister.                                                                                                                                  |
+
+### Example configuration:
+```csharp
+using NServiceBus;
+using NServiceBus.Persistence.MongoDB.Configuration;
+
+namespace Example
+{
+    public class EndpointConfiguration : IConfigureThisEndpoint, AsA_Publisher, IWantCustomInitialization
+    {
+        public void Init()
+        {
+                Configure.With()
+                    .DefaultBuilder()
+                    .MongoDbPersistence()
+                    .MongoSagaPersister()
+                    .InMemorySubscriptionStorage()
+                    .UseInMemoryTimeoutPersister();
+        }
+    }
 }
 ```
 

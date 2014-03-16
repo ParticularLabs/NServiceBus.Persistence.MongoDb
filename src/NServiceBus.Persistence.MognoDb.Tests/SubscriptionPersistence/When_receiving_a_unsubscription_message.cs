@@ -1,4 +1,9 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MongoDB.Driver.Linq;
+using NServiceBus.Persistence.MongoDB.SubscriptionPersistence;
+using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 {
@@ -13,7 +18,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             Storage.Unsubscribe(TestClients.ClientA, MessageTypes.All);
 
 
-            var count = Subscriptions.Count();
+            var count = Subscriptions.AsQueryable().Count(s => s.Subscribers != null && s.Subscribers.Any());
             Assert.AreEqual(0, count);
         }
     }

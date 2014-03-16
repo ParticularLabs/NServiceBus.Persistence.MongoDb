@@ -11,9 +11,13 @@ namespace NServiceBus.Persistence.MongoDB.SubscriptionPersistence
     public class Subscription
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        public SubscriptionKey Id { get; set; }
         
-        public string SubscriberEndpoint { get; set; }
+        public List<string> Subscribers { get; set; }
+    }
+
+    public class SubscriptionKey
+    {
         public string Version { get; set; }
         public string TypeName { get; set; }
     }

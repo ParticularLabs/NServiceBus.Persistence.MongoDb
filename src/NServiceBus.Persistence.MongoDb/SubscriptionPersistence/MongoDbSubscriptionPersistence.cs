@@ -29,37 +29,41 @@ namespace NServiceBus.Persistence.MongoDB.SubscriptionPersistence
 
         public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)
         {
-            foreach (var messageType in messageTypes)
+            foreach (var key in GetMessageTypeKeys(messageTypes))
             {
-                if(_subscriptions.AsQueryable().Where(x => x.TypeName == messageType.TypeName && x.SubscriberEndpoint == client.ToString()).ToList().Any(x => new MessageType(x.TypeName, x.Version) == messageType))
-                    continue;
-                
-                _subscriptions.Save(new Subscription
-                                        {
-                                            SubscriberEndpoint = client.ToString(),
-                                            Version = messageType.Version.ToString(),
-                                            TypeName = messageType.TypeName
-                                        });
+                var query = Query<Subscription>.EQ(s => s.Id, key);
+                var update = Update<Subscription>.AddToSet(s => s.Subscribers, client.ToString());
+
+                _subscriptions.Update(query, update, UpdateFlags.Upsert);
             }
+        }
+
+        private IEnumerable<SubscriptionKey> GetMessageTypeKeys(IEnumerable<MessageType> messageTypes)
+        {
+            return messageTypes.Select(t => new SubscriptionKey {TypeName = t.TypeName, Version = t.Version.Major.ToString()});
         }
 
         public void Unsubscribe(Address client, IEnumerable<MessageType> messageTypes)
         {
-            var typeNames = messageTypes.Select(mt => mt.TypeName);
-            var subscriptions = _subscriptions.AsQueryable().Where(x => x.TypeName.In(typeNames) && x.SubscriberEndpoint == client.ToString()).ToList();
+            foreach (var key in GetMessageTypeKeys(messageTypes))
+            {
+                var query = Query.And(Query<Subscription>.EQ(s => s.Id, key), Query<Subscription>.EQ(s => s.Subscribers, client.ToString()));
+                var update = Update<Subscription>.Pull(s => s.Subscribers, client.ToString());
 
-            foreach (var subscription in subscriptions)
-                _subscriptions.Remove(Query<Subscription>.EQ(s => s.Id, subscription.Id));
+                _subscriptions.Update(query, update, UpdateFlags.None);
+            }
         }
 
         public IEnumerable<Address> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes)
         {
-            var typeNames = messageTypes.Select(mt => mt.TypeName);
+            var keys = GetMessageTypeKeys(messageTypes);
+
             return _subscriptions.AsQueryable()
-                    .Where(s => s.TypeName.In(typeNames)).ToList()
-                    .Where(s => messageTypes.Contains(new MessageType(s.TypeName, s.Version)))
-                    .Select(s => Address.Parse(s.SubscriberEndpoint))
-                    .Distinct();
+                .Where(s => keys.Contains(s.Id))
+                .ToList()
+                .SelectMany(s => s.Subscribers)
+                .Distinct()
+                .Select(Address.Parse);
         }
     }
 }

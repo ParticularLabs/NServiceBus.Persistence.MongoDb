@@ -9,7 +9,7 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
 {
     public static class ConfigureMongoDbSubscriptionPersistence
     {
-        public static Configure MongoSubscriptionStorage(this Configure config)
+        public static Configure MongoDbSubscriptionStorage(this Configure config)
         {
             config.Configurer.ConfigureComponent<MongoDbSubscriptionPersistence>(DependencyLifecycle.InstancePerCall);
 

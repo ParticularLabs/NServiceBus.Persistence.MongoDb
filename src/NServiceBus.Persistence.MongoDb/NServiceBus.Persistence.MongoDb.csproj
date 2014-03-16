@@ -66,6 +66,7 @@
     <Compile Include="SubscriptionPersistence\MongoDbSubscriptionPersistence.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="NServiceBus.Persistence.MongoDb.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

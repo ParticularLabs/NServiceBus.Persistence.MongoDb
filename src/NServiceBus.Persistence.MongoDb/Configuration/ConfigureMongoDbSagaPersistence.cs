@@ -11,7 +11,7 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
 {
     public static class ConfigureMongoDbSagaPersistence
     {
-        public static Configure MongoSagaPersister(this Configure config)
+        public static Configure MongoDbSagaPersister(this Configure config)
         {
             if (!config.Configurer.HasComponent<MongoDbRepository>())
                 config.MongoDbPersistence();

@@ -28,6 +28,13 @@ public class MySagaData : IContainSagaData
     public string OriginalMessageId { get; set; }
 }
 ```
+### Installation
+There are two ways:
+* Grab the source and compile it yourself :-)
+* Install the NuGet Package `NServiceBus.Persistence.MongoDb` by typing in the Package Manager Console: 
+  ```
+  Install-Package NServiceBus.Persistence.MongoDb
+  ```
 
 ### Usage
 To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  

@@ -75,7 +75,7 @@ Sagas are a great feature of NServiceBus.  The key concurrency safeguards that s
 The persister uses MongoDb's [Unique Indexes](http://docs.mongodb.org/manual/core/index-unique/) to ensure only one document can contain the unique data.
 
 #### Concurrent access to existing saga instances
-The persister uses a document versioning scheme built on top of MongoDb's [findAndModify](http://docs.mongodb.org/manual/reference/command/findAndModify/) command to atomically update the existing persisted data only if it has not been changed since it was retrieved.  Since the update is atomic, it will ensure that if multiple simultaneous updates to a saga only one will succeed.
+The persister uses a document versioning scheme built on top of MongoDb's [findAndModify](http://docs.mongodb.org/manual/reference/command/findAndModify/) command to atomically update the existing persisted data only if it has not been changed since it was retrieved.  Since the update is atomic, it will ensure that if there are multiple simultaneous updates to a saga, only one will succeed.
 
 ### Credits
 A major fork of https://github.com/justinsaraceno/NServicebus-Mongo.

@@ -2,7 +2,7 @@
 <package>
   <metadata>
       <id>NServiceBus.Persistence.MongoDb</id>
-      <version>0.1</version>
+      <version>0.2</version>
       <title>NServiceBus.Persistence.MongoDb</title>
       <authors>rhoffman</authors>
       <owners>rhoffman</owners>
@@ -12,8 +12,8 @@
       <copyright>Copyright 2014</copyright>
       <tags>NServiceBus MongoDb Persistence Saga Subscriptions</tags>
       <dependencies>
-          <dependency id="mongocsharpdriver" version="1.8.3" />
-          <dependency id="NServiceBus" version="4.4.2" />
+          <dependency id="mongocsharpdriver" version="1.9.2" />
+          <dependency id="NServiceBus" version="4.6.3" />
       </dependencies>
   </metadata>
 </package>

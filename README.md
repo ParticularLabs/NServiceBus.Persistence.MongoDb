@@ -79,3 +79,5 @@ The persister uses a document versioning scheme built on top of MongoDb's [findA
 
 ### Credits
 A major fork of https://github.com/justinsaraceno/NServicebus-Mongo.
+
+Also thanks to @ruslander for his contribution.

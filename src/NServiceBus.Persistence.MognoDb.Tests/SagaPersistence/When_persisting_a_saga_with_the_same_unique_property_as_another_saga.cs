@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             };
 
             SaveSaga(saga1);
-            Assert.Throws<WriteConcernException>(() => SaveSaga(saga2));
+            Assert.Throws<MongoDuplicateKeyException>(() => SaveSaga(saga2));
         }
     }
 }

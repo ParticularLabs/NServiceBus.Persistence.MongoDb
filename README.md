@@ -1,10 +1,7 @@
 NServiceBus.Persistence.MongoDb
 ===============================
 
-MongoDB Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.  
-
-### Not for production use
-This is experimental and has not been put into production use.
+MongoDB Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.
 
 ### TODO
 * Timeout Persistence

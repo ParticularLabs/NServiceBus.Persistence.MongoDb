@@ -84,7 +84,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         {
             var versionName = camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection(_repo.GetCollectionName(typeof(T)));
-            collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set("version", version));
+            collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set(versionName, version));
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Globalization;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Configuration;
@@ -18,15 +19,23 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         private MongoDbRepository _repo;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
+        private bool camelCaseConventionSet;
 
         [SetUp]
         public virtual void SetupContext()
         {
+
+            var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
+            ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
+            camelCaseConventionSet = true;
+
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
             _client = new MongoClient(connectionString);
             _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
             _repo = new MongoDbRepository(_database);
+
+            
             _sagaPersister = new MongoDbSagaPersistence(_repo);
         }
 
@@ -73,8 +82,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData
         {
+            var versionName = camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection(_repo.GetCollectionName(typeof(T)));
-            collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set("Version", version));
+            collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set("version", version));
         }
     }
 }

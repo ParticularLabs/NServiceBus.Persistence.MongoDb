@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Exceptions;
@@ -43,7 +45,15 @@ namespace NServiceBus.Persistence.MongoDB.Repository
         {
             var collection = _db.GetCollection(GetCollectionName(saga.GetType()));
 
-            var query = Query.And(Query.EQ("_id", saga.Id), Query.EQ("Version", version));
+            var convention = ConventionRegistry.Lookup(saga.GetType());
+            if (convention != null)
+            {
+                foreach (var c in convention.Conventions)
+                {
+                    
+                }
+            }
+            var query = Query.And(Query.EQ("_id", saga.Id), Query.EQ(versionFieldName, version));
 
             var bsonDoc = saga.ToBsonDocument();
             var update = new UpdateBuilder().Inc(versionFieldName, 1);

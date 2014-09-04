@@ -45,14 +45,6 @@ namespace NServiceBus.Persistence.MongoDB.Repository
         {
             var collection = _db.GetCollection(GetCollectionName(saga.GetType()));
 
-            var convention = ConventionRegistry.Lookup(saga.GetType());
-            if (convention != null)
-            {
-                foreach (var c in convention.Conventions)
-                {
-                    
-                }
-            }
             var query = Query.And(Query.EQ("_id", saga.Id), Query.EQ(versionFieldName, version));
 
             var bsonDoc = saga.ToBsonDocument();

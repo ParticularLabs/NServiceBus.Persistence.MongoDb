@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Repository;
 using NServiceBus.Saga;
 
@@ -20,7 +15,6 @@ namespace NServiceBus.Persistence.MongoDB.SagaPersistence
         {
             _repo = repo;
         }
-
 
         public void Save(IContainSagaData saga)
         {
@@ -55,10 +49,11 @@ namespace NServiceBus.Persistence.MongoDB.SagaPersistence
 
         public void Update(IContainSagaData saga)
         {
-            var versionProperty = DocumentVersionAttribute.GetDocumentVersionProperty(saga.GetType());
+            var sagaDataType = saga.GetType();
+            var versionProperty = DocumentVersionAttribute.GetDocumentVersionProperty(sagaDataType);
             var version = (int)versionProperty.GetValue(saga);
 
-            var classmap = BsonClassMap.LookupClassMap(saga.GetType());
+            var classmap = BsonClassMap.LookupClassMap(sagaDataType);
             var membermap = classmap.GetMemberMap(versionProperty.Name);
             var versionFieldName = membermap.ElementName;
 

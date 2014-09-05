@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Exceptions;
@@ -55,7 +51,15 @@ namespace NServiceBus.Persistence.MongoDB.Repository
                 update.Set(field.Name, field.Value);
             }
 
-            var modifyResult = collection.FindAndModify(query, SortBy.Null, update, true, false);
+            var modifyResult = collection.FindAndModify(new FindAndModifyArgs
+                                                        {
+                                                            Query = query,
+                                                            Update = update,
+                                                            SortBy = SortBy.Null,
+                                                            VersionReturned = FindAndModifyDocumentVersion.Modified,
+                                                            Upsert = false
+                                                        });
+
             if (modifyResult.ModifiedDocument == null)
             {
                 throw new SagaMongoDbConcurrentUpdateException(version);

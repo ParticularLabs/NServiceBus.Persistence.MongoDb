@@ -19,7 +19,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         private MongoDbRepository _repo;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
-        private bool camelCaseConventionSet;
+        private bool _camelCaseConventionSet;
 
         [SetUp]
         public virtual void SetupContext()
@@ -27,7 +27,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             var camelCasePack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
-            camelCaseConventionSet = true;
+            _camelCaseConventionSet = true;
 
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
@@ -82,7 +82,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData
         {
-            var versionName = camelCaseConventionSet ? "version" : "Version";
+            var versionName = _camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection(_repo.GetCollectionName(typeof(T)));
             collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set(versionName, version));
         }

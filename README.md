@@ -4,7 +4,7 @@ NServiceBus.Persistence.MongoDb
 MongoDB Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.
 
 ### TODO
-* Timeout Persistence
+* Timeout Persistence (We are accepting pull requests for this!)
 
 ### Requirements
 To use the saga persister, your IContainsSagaData requires a property that has the `[DocumentVersion]` attribute. A property containing the `[Unique]` attribute is also recommended.  Example:
@@ -77,4 +77,6 @@ The persister uses a document versioning scheme built on top of MongoDb's [findA
 ### Credits
 A major fork of https://github.com/justinsaraceno/NServicebus-Mongo.
 
-Also thanks to @ruslander for his contribution.
+### Thanks to our contributors
+[@ruslanrusu](https://twitter.com/ruslanrusu)  
+[CRuppert](https://github.com/CRuppert)

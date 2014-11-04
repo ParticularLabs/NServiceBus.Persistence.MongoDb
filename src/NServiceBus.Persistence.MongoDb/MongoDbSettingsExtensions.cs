@@ -18,9 +18,9 @@ namespace NServiceBus.Persistence.MongoDB
         }
 
         public static PersistenceExtentions<MongoDbPersistence> SetConnectionString(
-            this PersistenceExtentions<MongoDbPersistence> cfg, Func<string> getConnectionString)
+            this PersistenceExtentions<MongoDbPersistence> cfg, string connectionString)
         {
-            cfg.GetSettings().Set(MongoPersistenceSettings.ConnectionString, getConnectionString);
+            cfg.GetSettings().Set(MongoPersistenceSettings.ConnectionString, connectionString);
             return cfg;
         }
 

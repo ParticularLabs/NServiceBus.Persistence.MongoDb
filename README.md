@@ -1,12 +1,54 @@
 NServiceBus.Persistence.MongoDb
 ===============================
 
-MongoDB Persistence for NServiceBus Sagas.  It handles concurrency using a document versioning scheme.
+MongoDB Persistence for NServiceBus.  
 
-### TODO
-* Timeout Persistence (We are accepting pull requests for this!)
+### Installation
+There are two ways:
+* Grab the source and compile it yourself :-)
+* Install the NuGet Package `NServiceBus.Persistence.MongoDb` by typing in the Package Manager Console: 
+  ```
+  Install-Package NServiceBus.Persistence.MongoDb
+  ```
 
-### Requirements
+### Usage
+To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  
+
+### Example configuration:
+```csharp
+using NServiceBus;
+using NServiceBus.Persistence.MongoDB;
+
+namespace Example
+{
+    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    {
+        public void Customize(BusConfiguration configuration)
+        {
+            configuration.UsePersistence<MongoDbPersistence>();
+        }
+    }
+}
+```
+
+By default, the `NServiceBus/Persistence/MongoDB` connection string is used.
+```xml
+<connectionStrings>
+    <add name="NServiceBus/Persistence/MongoDB" connectionString="mongodb://localhost/databaseName"/>
+</connectionStrings>
+```
+
+A custom connection string name can be supplied via the `.SetConnectionStringName(string)` extension method:
+```csharp
+configuration.UsePersistence<MongoDbPersistence>().SetConnectionStringName("MyConnectionString");
+```
+
+A full connection string name can be supplied via the `.SetConnectionString(string)` extension method:
+```csharp
+configuration.UsePersistence<MongoDbPersistence>().SetConnectionString("mongodb://localhost/databaseName");
+```
+
+### Saga Data Requirements
 To use the saga persister, your IContainsSagaData requires a property that has the `[DocumentVersion]` attribute. A property containing the `[Unique]` attribute is also recommended.  Example:
 
 ```csharp
@@ -25,46 +67,8 @@ public class MySagaData : IContainSagaData
     public string OriginalMessageId { get; set; }
 }
 ```
-### Installation
-There are two ways:
-* Grab the source and compile it yourself :-)
-* Install the NuGet Package `NServiceBus.Persistence.MongoDb` by typing in the Package Manager Console: 
-  ```
-  Install-Package NServiceBus.Persistence.MongoDb
-  ```
 
-### Usage
-To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  
-
-| Method                          | Documentation                                                                                                                                               |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.MongoDbPersistence()`         | Configures the MongoDB database connection. With no arguments, it automatically uses the connectionString with the name `NServiceBus/Persistence/MongoDB.`  |
-| `.MongoDbSagaPersister()`       | Enables Saga Persister.                                                                                                                                     |
-| `.MongoDbSubscriptionStorage()` | Enables Subscription Storage                                                                                                                                |
-
-### Example configuration:
-```csharp
-using NServiceBus;
-using NServiceBus.Persistence.MongoDB.Configuration;
-
-namespace Example
-{
-    public class EndpointConfiguration : IConfigureThisEndpoint, AsA_Publisher, IWantCustomInitialization
-    {
-        public void Init()
-        {
-                Configure.With()
-                    .DefaultBuilder()
-                    .MongoDbPersistence()
-                    .MongoSagaPersister()
-                    .MongoDbSubscriptionStorage()
-                    .UseInMemoryTimeoutPersister();
-        }
-    }
-}
-```
-
-### Handling Concurrency With MongoDb
+### Handling Concurrency in Sagas With MongoDb
 Sagas are a great feature of NServiceBus.  The key concurrency safeguards that sagas guarantee (see: http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency) depend heavily on the underlying data store.  The two specific cases that NServiceBus relies on the underling data store are [concurrent access to non-existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-non-existing-saga-instances) and [concurrent access to existing saga instances](http://docs.particular.net/NServiceBus/nservicebus-sagas-and-concurrency#concurrent-access-to-existing-saga-instances).
 
 #### Concurrent access to non-existing saga instances

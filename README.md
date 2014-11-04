@@ -43,7 +43,7 @@ A custom connection string name can be supplied via the `.SetConnectionStringNam
 configuration.UsePersistence<MongoDbPersistence>().SetConnectionStringName("MyConnectionString");
 ```
 
-A full connection string name can be supplied via the `.SetConnectionString(string)` extension method:
+A connection string can be supplied via the `.SetConnectionString(string)` extension method:
 ```csharp
 configuration.UsePersistence<MongoDbPersistence>().SetConnectionString("mongodb://localhost/databaseName");
 ```

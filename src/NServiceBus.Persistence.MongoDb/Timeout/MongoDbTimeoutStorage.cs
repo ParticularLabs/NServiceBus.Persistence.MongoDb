@@ -16,7 +16,8 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<TimeoutPersister>(DependencyLifecycle.InstancePerCall)
+                .ConfigureProperty(x => x.EndpointName, context.Settings.EndpointName());
         }
     }
 }

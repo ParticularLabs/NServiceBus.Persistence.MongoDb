@@ -16,6 +16,11 @@ namespace NServiceBus.Persistence.MongoDB
     {
         public MongoDbPersistence()
         {
+            Defaults(s =>
+            {
+                s.EnableFeatureByDefault<MongoDbStorage>();
+            });
+
             Supports(Storage.GatewayDeduplication, s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
             Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<MongoDbTimeoutStorage>());
             Supports(Storage.Sagas, s => s.EnableFeatureByDefault<MongoDbSagaStorage>());

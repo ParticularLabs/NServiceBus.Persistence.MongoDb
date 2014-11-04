@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb", "NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj", "{B34DDE97-B5F7-4FDE-8144-CE0A5C886947}"
 EndProject
@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DDEF47
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Persistence.MongoDb.Example", "NServiceBus.Persistence.MongoDb.Example\NServiceBus.Persistence.MongoDb.Example.csproj", "{76A67356-4D42-4C58-A27F-74063C53CC7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +30,10 @@ Global
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B39C103-9D66-490C-AF20-CDC976F80F90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76A67356-4D42-4C58-A27F-74063C53CC7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,7 +12,7 @@ There are two ways:
   ```
 
 ### Usage
-To enable MongoDB persistence, call `configuration.UsePersistence<MongoDbPersistence>()` on your BusConfiguration instance.  
+To enable MongoDB persistence, call `UsePersistence<MongoDbPersistence>()` on your BusConfiguration instance.  
 
 ### Example configuration:
 ```csharp

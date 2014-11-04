@@ -13,6 +13,14 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
         public const string SagaUniqueIdentityCollectionName = "saga_unique_ids";
     }
 
+    public static class MongoPersistenceSettings
+    {
+        public const string ConnectionStringName = "MongoDbConnectionStringName";
+        public const string ConnectionString = "MongoDbConnectionString";
+        
+    }
+
+    
     public class MongoDbStorage : Feature
     {
         internal MongoDbStorage()
@@ -24,7 +32,19 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.MongoDbPersistence();
+            if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionStringName))
+            {
+                context.Container.MongoDbPersistence(context.Settings.Get<string>(MongoPersistenceSettings.ConnectionStringName));
+            }
+
+            else if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionString))
+            {
+                context.Container.MongoDbPersistence(() => context.Settings.Get<string>(MongoPersistenceSettings.ConnectionString));
+            }
+            else
+            {
+                context.Container.MongoDbPersistence();
+            }
         }
     }
 
@@ -39,6 +59,7 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
             config.RegisterSingleton(database);
             config.RegisterSingleton(server);
             config.RegisterSingleton(new MongoDbRepository(database));
+
             return config;
         }
 

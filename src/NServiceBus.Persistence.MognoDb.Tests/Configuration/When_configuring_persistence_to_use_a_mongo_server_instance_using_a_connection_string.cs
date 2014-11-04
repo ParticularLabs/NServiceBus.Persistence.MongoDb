@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using NServiceBus.Persistence.MongoDB;
 using NServiceBus.Persistence.MongoDB.Configuration;
 using NUnit.Framework;
 
@@ -15,11 +16,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Configuration
         {
             _connectionStringName = "MongoDB";
 
-            var config = Configure.With(new[] { GetType().Assembly })
-                .DefineEndpointName("UnitTests")
-                .DefaultBuilder()
-
-                .MongoDbPersistence(_connectionStringName);
+            var config = new BusConfiguration();
+            config.UsePersistence<MongoDbPersistence>();
+            config.EndpointName("UnitTests");
+            
+            
 
             _db = config.Builder.Build<MongoDatabase>();
         }

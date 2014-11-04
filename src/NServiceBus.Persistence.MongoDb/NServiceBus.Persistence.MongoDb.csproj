@@ -38,13 +38,9 @@
     <Reference Include="MongoDB.Driver">
       <HintPath>..\packages\mongocsharpdriver.1.9.2\lib\net35\MongoDB.Driver.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceBus, Version=4.6.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+    <Reference Include="NServiceBus.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NServiceBus.Interfaces.4.6.4\lib\net40\NServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="NServiceBus.Core, Version=4.6.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NServiceBus.4.6.4\lib\net40\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.5.1.0\lib\net45\NServiceBus.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -57,13 +53,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigureMongoDbPersistence.cs" />
-    <Compile Include="Configuration\ConfigureMongoDbSagaPersistence.cs" />
-    <Compile Include="Configuration\ConfigureMongoDbSubscriptionPersistence.cs" />
+    <Compile Include="Configuration\MongoDbSagaStorage.cs" />
     <Compile Include="DocumentVersionAttribute.cs" />
     <Compile Include="Exceptions\SagaMongoDbConcurrentUpdateException.cs" />
+    <Compile Include="MongoDbPersistence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\MongoDbRepository.cs" />
     <Compile Include="SagaPersistence\MongoDbSagaPersistence.cs" />
+    <Compile Include="Configuration\MongoDbSubscriptionStorage.cs" />
     <Compile Include="SubscriptionPersistence\Subscription.cs" />
     <Compile Include="SubscriptionPersistence\MongoDbSubscriptionPersistence.cs" />
   </ItemGroup>

@@ -8,7 +8,6 @@ using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
 using NServiceBus.Logging;
 using NServiceBus.Persistence.MongoDB.Configuration;
-using NServiceBus.Persistence.Raven.SubscriptionStorage;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 

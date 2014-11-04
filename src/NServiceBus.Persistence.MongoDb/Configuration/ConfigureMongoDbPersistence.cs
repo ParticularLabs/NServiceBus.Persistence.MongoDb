@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using MongoDB.Driver;
+using NServiceBus.Features;
 using NServiceBus.Persistence.MongoDB.Repository;
 
 namespace NServiceBus.Persistence.MongoDB.Configuration
@@ -12,21 +13,36 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
         public const string SagaUniqueIdentityCollectionName = "saga_unique_ids";
     }
 
-    public static class ConfigureMongoDbPersistence
+    public class MongoDbStorage : Feature
     {
-        public static Configure MongoDbPersistence(this Configure config, MongoServer server, MongoDatabase database)
+        internal MongoDbStorage()
+        {
+        }
+
+        /// <summary>
+        /// Called when the feature should perform its initialization. This call will only happen if the feature is enabled.
+        /// </summary>
+        protected override void Setup(FeatureConfigurationContext context)
+        {
+            context.Container.MongoDbPersistence();
+        }
+    }
+
+    internal static class ConfigureMongoDbPersistence
+    {
+        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, MongoServer server, MongoDatabase database)
         {
             if (config == null) throw new ArgumentNullException("config");
             if (server == null) throw new ArgumentNullException("server");
             if (database == null) throw new ArgumentNullException("database");
 
-            config.Configurer.RegisterSingleton<MongoDatabase>(database);
-            config.Configurer.RegisterSingleton<MongoServer>(server);
-            config.Configurer.RegisterSingleton<MongoDbRepository>(new MongoDbRepository(database));
+            config.RegisterSingleton(database);
+            config.RegisterSingleton(server);
+            config.RegisterSingleton(new MongoDbRepository(database));
             return config;
         }
 
-        public static Configure MongoDbPersistence(this Configure config, string connectionStringName)
+        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, string connectionStringName)
         {
             var connectionStringEntry = ConfigurationManager.ConnectionStrings[connectionStringName];
 
@@ -39,20 +55,12 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
             return MongoPersistenceWithConectionString(config, connectionString);
         }
 
-        public static Configure MongoDbPersistence(this Configure config)
+        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config)
         {
-            var connectionStringSetting = ConfigurationManager.ConnectionStrings["NServiceBus/Persistence/MongoDB"];
-
-            //user existing config if we can find one
-            if (connectionStringSetting != null)
-            {
-                return MongoPersistenceWithConectionString(config, connectionStringSetting.ConnectionString);
-            }
-
-            return MongoPersistenceWithConectionString(config, String.Format("mongodb://localhost/{0}", Configure.EndpointName));
+            return MongoDbPersistence(config, "NServiceBus/Persistence/MongoDB");
         }
 
-        public static Configure MongoPersistenceWithConectionString(Configure config, string connectionString)
+        public static ObjectBuilder.IConfigureComponents MongoPersistenceWithConectionString(ObjectBuilder.IConfigureComponents config, string connectionString)
         {
             var databaseName = MongoUrl.Create(connectionString).DatabaseName;
             if (String.IsNullOrWhiteSpace(databaseName))
@@ -67,8 +75,8 @@ namespace NServiceBus.Persistence.MongoDB.Configuration
 
             return MongoDbPersistence(config, server, database);
         }
-        
-        public static Configure MongoDbPersistence(this Configure config, Func<string> getConnectionString)
+
+        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, Func<string> getConnectionString)
         {
             var connectionString = getConnectionString();
 

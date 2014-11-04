@@ -1,7 +1,7 @@
 NServiceBus.Persistence.MongoDb
 ===============================
 
-MongoDB Persistence for NServiceBus.  
+MongoDB Persistence for NServiceBus 5.  
 
 ### Installation
 There are two ways:
@@ -12,7 +12,7 @@ There are two ways:
   ```
 
 ### Usage
-To enable MongoDB persistence, use the MongoDB extention methods when calling Configure.  
+To enable MongoDB persistence, call `configuration.UsePersistence<MongoDbPersistence>()` on your BusConfiguration instance.  
 
 ### Example configuration:
 ```csharp

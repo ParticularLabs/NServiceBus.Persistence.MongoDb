@@ -1,4 +1,5 @@
 ﻿using NServiceBus.Features;
+using NServiceBus.Persistence.MongoDB.Database;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
@@ -7,6 +8,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         internal MongoDbTimeoutStorage()
         {
             DependsOn<TimeoutManager>();
+            DependsOn<MongoDbStorage>();
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
     {
         internal MongoDbSubscriptionStorage()
         {
+            DependsOn<StorageDrivenPublishing>();
             DependsOn<MongoDbStorage>();
         }
 

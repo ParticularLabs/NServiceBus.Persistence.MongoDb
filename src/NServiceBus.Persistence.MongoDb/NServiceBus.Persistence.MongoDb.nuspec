@@ -10,7 +10,7 @@
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>MongoDB Persistence for NServiceBus.</description>
       <copyright>Copyright 2014</copyright>
-      <tags>NServiceBus MongoDb Persistence Saga Subscriptions</tags>
+      <tags>NServiceBus MongoDb Persistence</tags>
       <dependencies>
           <dependency id="mongocsharpdriver" version="1.9.2" />
           <dependency id="NServiceBus" version="5.1.0" />

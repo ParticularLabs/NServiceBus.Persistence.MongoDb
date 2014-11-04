@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
-using NServiceBus.Logging;
-using NServiceBus.Persistence.MongoDB.Configuration;
+using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
-namespace NServiceBus.Persistence.MongoDB.SubscriptionPersistence
+namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
-    public class MongoDbSubscriptionPersistence : ISubscriptionStorage
+    public class SubscriptionPersister : ISubscriptionStorage
     {
         private readonly MongoCollection<Subscription> _subscriptions;
 
-        public MongoDbSubscriptionPersistence(MongoDatabase database)
+        public SubscriptionPersister(MongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
         }

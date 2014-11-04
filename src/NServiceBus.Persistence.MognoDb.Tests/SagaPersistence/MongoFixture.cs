@@ -5,9 +5,8 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
-using NServiceBus.Persistence.MongoDB.Configuration;
-using NServiceBus.Persistence.MongoDB.Repository;
-using NServiceBus.Persistence.MongoDB.SagaPersistence;
+using NServiceBus.Persistence.MongoDB.Database;
+using NServiceBus.Persistence.MongoDB.Sagas;
 using NServiceBus.Saga;
 using NUnit.Framework;
 
@@ -36,7 +35,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _repo = new MongoDbRepository(_database);
 
             
-            _sagaPersister = new MongoDbSagaPersistence(_repo);
+            _sagaPersister = new SagaPersister(_repo);
         }
 
         protected MongoCollection<BsonDocument> Sagas

@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using MongoDB.Bson.Serialization;
-using NServiceBus.Persistence.MongoDB.Repository;
+using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Saga;
 
-namespace NServiceBus.Persistence.MongoDB.SagaPersistence
+namespace NServiceBus.Persistence.MongoDB.Sagas
 {
-    public class MongoDbSagaPersistence : ISagaPersister
+    public class SagaPersister : ISagaPersister
     {
         private readonly MongoDbRepository _repo;
 
-        public MongoDbSagaPersistence(MongoDbRepository repo)
+        public SagaPersister(MongoDbRepository repo)
         {
             _repo = repo;
         }

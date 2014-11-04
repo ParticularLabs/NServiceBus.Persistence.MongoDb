@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
-using NServiceBus.Persistence.MongoDB.Exceptions;
+using NServiceBus.Persistence.MongoDB.Sagas;
 using NServiceBus.Saga;
 
-namespace NServiceBus.Persistence.MongoDB.Repository
+namespace NServiceBus.Persistence.MongoDB.Database
 {
     public class MongoDbRepository
     {

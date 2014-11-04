@@ -74,6 +74,8 @@
     <Compile Include="SubscriptionPersistence\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionPersistence\When_receiving_a_unsubscription_message.cs" />
     <Compile Include="SubscriptionPersistence\When_using_semantic_versioning_of_messages.cs" />
+    <None Include="TimeoutPersistence\Should_not_skip_timeouts.cs" />
+    <Compile Include="TimeoutPersistence\When_fetching_timeouts_from_storage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -85,9 +87,7 @@
       <Name>NServiceBus.Persistence.MongoDb</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TimeoutPersistence\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

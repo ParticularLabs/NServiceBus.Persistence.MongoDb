@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Configuration;
-using NServiceBus.Persistence.MongoDB.SagaPersistence;
+using NServiceBus.Persistence.MongoDB.Database;
+using NServiceBus.Persistence.MongoDB.Gateway;
+using NServiceBus.Persistence.MongoDB.Sagas;
+using NServiceBus.Persistence.MongoDB.Subscriptions;
+using NServiceBus.Persistence.MongoDB.Timeout;
 
 namespace NServiceBus.Persistence.MongoDB
 {
@@ -13,14 +16,8 @@ namespace NServiceBus.Persistence.MongoDB
     {
         public MongoDbPersistence()
         {
-            Defaults(s =>
-            {
-                s.EnableFeatureByDefault<MongoDbStorage>();
-            });
-
-            /*Supports(Storage.GatewayDeduplication, s => s.EnableFeatureByDefault<RavenDbGatewayDeduplication>());
-            Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<RavenDbTimeoutStorage>());*/
-
+            Supports(Storage.GatewayDeduplication, s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
+            Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<MongoDbTimeoutStorage>());
             Supports(Storage.Sagas, s => s.EnableFeatureByDefault<MongoDbSagaStorage>());
             Supports(Storage.Subscriptions, s => s.EnableFeatureByDefault<MongoDbSubscriptionStorage>());
         }

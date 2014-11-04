@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MongoDB.Bson;
+﻿using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace NServiceBus.Persistence.MongoDB.SubscriptionPersistence
+namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
     public class Subscription
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NServiceBus.Configuration.AdvanceExtensibility;
-using NServiceBus.Persistence.MongoDB.Configuration;
+using NServiceBus.Persistence.MongoDB.Database;
 
 namespace NServiceBus.Persistence.MongoDB
 {

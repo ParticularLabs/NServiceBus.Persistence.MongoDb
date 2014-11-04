@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver.Linq;
-using NServiceBus.Persistence.MongoDB.SubscriptionPersistence;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence

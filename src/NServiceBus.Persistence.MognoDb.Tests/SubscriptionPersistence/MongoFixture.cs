@@ -2,15 +2,15 @@
 using System.Configuration;
 using System.Globalization;
 using MongoDB.Driver;
-using NServiceBus.Persistence.MongoDB.Configuration;
-using NServiceBus.Persistence.MongoDB.SubscriptionPersistence;
+using NServiceBus.Persistence.MongoDB.Database;
+using NServiceBus.Persistence.MongoDB.Subscriptions;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 {
     public class MongoFixture
     {
-        private MongoDbSubscriptionPersistence _storage;
+        private SubscriptionPersister _storage;
         private MongoDatabase _database;
         private MongoClient _client;
 
@@ -19,12 +19,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         {
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
-            _client = new MongoClient(connectionString);;
+            _client = new MongoClient(connectionString);
             _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
-            _storage = new MongoDbSubscriptionPersistence(_database);
+            _storage = new SubscriptionPersister(_database);
         }
 
-        protected MongoDbSubscriptionPersistence Storage
+        protected SubscriptionPersister Storage
         {
             get { return _storage; }
         }

@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
-using MongoDB.Driver.Linq;
-using NServiceBus.Persistence.MongoDB.Repository;
 using NServiceBus.Timeout.Core;
 
-namespace NServiceBus.Persistence.MongoDB.TimeoutPersistence
+namespace NServiceBus.Persistence.MongoDB.Timeout
 {
-    public class MongoDbTimeoutPersistence : IPersistTimeouts
+    public class TimeoutPersister : IPersistTimeouts
     {
         private readonly MongoDatabase _database;
         private readonly MongoCollection<TimeoutEntity> _collection;
 
-        public MongoDbTimeoutPersistence(MongoDatabase database)
+        public TimeoutPersister(MongoDatabase database)
         {
             _database = database;
             _collection = _database.GetCollection<TimeoutEntity>("timeouts");
@@ -67,7 +62,7 @@ namespace NServiceBus.Persistence.MongoDB.TimeoutPersistence
             var timeoutId = Guid.Empty;
 
             string messageId;
-            if (timeout.Headers.TryGetValue(Headers.MessageId, out messageId))
+            if (timeout.Headers != null && timeout.Headers.TryGetValue(Headers.MessageId, out messageId))
             {
                 Guid.TryParse(messageId, out timeoutId);
             }

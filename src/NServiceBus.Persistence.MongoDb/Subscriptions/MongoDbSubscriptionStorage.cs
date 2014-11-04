@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Configuration;
-using NServiceBus.Persistence.MongoDB.SubscriptionPersistence;
+﻿using NServiceBus.Features;
+using NServiceBus.Persistence.MongoDB.Database;
 
-namespace NServiceBus.Persistence.MongoDB.SagaPersistence
+namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
     public class MongoDbSubscriptionStorage : Feature
     {
@@ -21,7 +15,7 @@ namespace NServiceBus.Persistence.MongoDB.SagaPersistence
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<MongoDbSubscriptionPersistence>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<SubscriptionPersister>(DependencyLifecycle.InstancePerCall);
         }
     }
 }

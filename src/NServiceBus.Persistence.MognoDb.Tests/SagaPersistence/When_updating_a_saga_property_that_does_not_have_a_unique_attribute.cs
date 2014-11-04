@@ -2,8 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
-using NServiceBus.Persistence.MongoDB.Exceptions;
-using NServiceBus.Persistence.MongoDB.SagaPersistence;
+using NServiceBus.Persistence.MongoDB.Sagas;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence

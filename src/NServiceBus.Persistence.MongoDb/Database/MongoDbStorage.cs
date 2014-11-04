@@ -2,9 +2,8 @@
 using System.Configuration;
 using MongoDB.Driver;
 using NServiceBus.Features;
-using NServiceBus.Persistence.MongoDB.Repository;
 
-namespace NServiceBus.Persistence.MongoDB.Configuration
+namespace NServiceBus.Persistence.MongoDB.Database
 {
     public static class MongoPersistenceConstants
     {

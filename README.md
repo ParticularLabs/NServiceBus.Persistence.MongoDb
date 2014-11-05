@@ -81,6 +81,9 @@ The persister uses a document versioning scheme built on top of MongoDb's [findA
 ### Credits
 A major fork of https://github.com/justinsaraceno/NServicebus-Mongo.
 
+### Build Status
+[![Build status](https://ci.appveyor.com/api/projects/status/60tbh0n2e62a87x4/branch/master?svg=true)](https://ci.appveyor.com/project/ruslander/nservicebus-persistence-mongodb/branch/master)
+
 ### Thanks to our contributors
 [@ruslanrusu](https://twitter.com/ruslanrusu)  
 [CRuppert](https://github.com/CRuppert)

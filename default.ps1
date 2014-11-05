@@ -32,7 +32,7 @@ Properties {
 }
 
 # default task
-task default -Depends Build
+task default -Depends Compile
 
 task Build -depends Compile, Test {}
 

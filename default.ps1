@@ -34,7 +34,7 @@ Properties {
 # default task
 task default -Depends Compile
 
-task Build -depends Compile, Test {}
+task Build -depends Compile {}
 
 task Compile {
     Write-Host "Building main solution ($projectConfig)" -ForegroundColor Green

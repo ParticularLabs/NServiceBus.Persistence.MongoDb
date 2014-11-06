@@ -19,6 +19,11 @@ namespace NServiceBus.Persistence.MongoDB.Database
         
     }
 
+    public static class MongoPersistenceConnectionStringNames
+    {
+        public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
+    }
+
     
     public class MongoDbStorage : Feature
     {
@@ -57,8 +62,8 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
             config.RegisterSingleton(database);
             config.RegisterSingleton(server);
-            config.RegisterSingleton(new MongoDbSagaRepository(database));
-
+            
+            
             return config;
         }
 
@@ -77,7 +82,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
         public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config)
         {
-            return MongoDbPersistence(config, "NServiceBus/Persistence/MongoDB");
+            return MongoDbPersistence(config, MongoPersistenceConnectionStringNames.DefaultConnectionStringName);
         }
 
         public static ObjectBuilder.IConfigureComponents MongoPersistenceWithConectionString(ObjectBuilder.IConfigureComponents config, string connectionString)

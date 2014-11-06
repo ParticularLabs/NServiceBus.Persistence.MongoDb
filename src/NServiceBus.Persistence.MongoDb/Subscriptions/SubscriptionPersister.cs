@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -9,7 +10,7 @@ using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
-    public class SubscriptionPersister : ISubscriptionStorage, IWantToRunWhenBusStartsAndStops
+    public class SubscriptionPersister : ISubscriptionStorage
     {
         private readonly MongoCollection<Subscription> _subscriptions;
 
@@ -17,19 +18,10 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
         }
-
-        void IWantToRunWhenBusStartsAndStops.Start()
-        {
-            _subscriptions.EnsureIndex(s => s.Id, s => s.Subscribers);
-        }
-
-        void IWantToRunWhenBusStartsAndStops.Stop()
-        {
-
-        }
-
+        
         public void Init()
         {
+            _subscriptions.EnsureIndex(s => s.Id, s => s.Subscribers);
         }
 
         public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)

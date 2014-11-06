@@ -15,7 +15,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
     public class MongoFixture
     {
         private MongoDatabase _database;
-        private MongoDbRepository _repo;
+        private MongoDbSagaRepository _repo;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
@@ -32,7 +32,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             _client = new MongoClient(connectionString);
             _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
-            _repo = new MongoDbRepository(_database);
+            _repo = new MongoDbSagaRepository(_database);
 
             
             _sagaPersister = new SagaPersister(_repo);
@@ -82,7 +82,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData
         {
             var versionName = _camelCaseConventionSet ? "version" : "Version";
-            var collection = _database.GetCollection(_repo.GetCollectionName(typeof(T)));
+            var collection = _database.GetCollection(typeof(T).Name.ToLower());
             collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set(versionName, version));
         }
     }

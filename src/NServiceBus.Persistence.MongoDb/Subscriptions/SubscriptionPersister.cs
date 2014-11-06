@@ -9,13 +9,23 @@ using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
-    public class SubscriptionPersister : ISubscriptionStorage
+    public class SubscriptionPersister : ISubscriptionStorage, IWantToRunWhenBusStartsAndStops
     {
         private readonly MongoCollection<Subscription> _subscriptions;
 
         public SubscriptionPersister(MongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
+        }
+
+        void IWantToRunWhenBusStartsAndStops.Start()
+        {
+            _subscriptions.EnsureIndex(s => s.Id, s => s.Subscribers);
+        }
+
+        void IWantToRunWhenBusStartsAndStops.Stop()
+        {
+
         }
 
         public void Init()

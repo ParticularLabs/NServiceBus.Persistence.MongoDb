@@ -57,7 +57,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
             config.RegisterSingleton(database);
             config.RegisterSingleton(server);
-            config.RegisterSingleton(new MongoDbRepository(database));
+            config.RegisterSingleton(new MongoDbSagaRepository(database));
 
             return config;
         }

@@ -4,14 +4,17 @@ using System.Linq;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Timeout.Core;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
-    public class TimeoutPersister : IPersistTimeouts
+    public class TimeoutPersister : IPersistTimeouts, IWantToRunWhenBusStartsAndStops
     {
         private readonly MongoDatabase _database;
         private readonly MongoCollection<TimeoutEntity> _collection;
+        
+        public string EndpointName { get; set; }
 
         public TimeoutPersister(MongoDatabase database)
         {
@@ -20,7 +23,15 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         }
 
 
-        public string EndpointName { get; set; }
+        void IWantToRunWhenBusStartsAndStops.Start()
+        {
+            _collection.EnsureIndex(t => t.SagaId);
+        }
+
+        void IWantToRunWhenBusStartsAndStops.Stop()
+        {
+
+        }
         
 
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
@@ -119,6 +130,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             _collection.Remove(Query<TimeoutEntity>.EQ(t => t.SagaId, sagaId));
         }
+
         
     }
     

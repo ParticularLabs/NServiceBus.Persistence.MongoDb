@@ -60,7 +60,7 @@
     <Compile Include="MongoDbPersistence.cs" />
     <Compile Include="MongoDbSettingsExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Database\MongoDbRepository.cs" />
+    <Compile Include="Database\MongoDbSagaRepository.cs" />
     <Compile Include="Sagas\MongoDbSagaStorage.cs" />
     <Compile Include="Sagas\SagaMongoDbConcurrentUpdateException.cs" />
     <Compile Include="Sagas\SagaPersister.cs" />

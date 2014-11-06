@@ -7,9 +7,9 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 {
     public class SagaPersister : ISagaPersister
     {
-        private readonly MongoDbRepository _repo;
+        private readonly MongoDbSagaRepository _repo;
 
-        public SagaPersister(MongoDbRepository repo)
+        public SagaPersister(MongoDbSagaRepository repo)
         {
             _repo = repo;
         }

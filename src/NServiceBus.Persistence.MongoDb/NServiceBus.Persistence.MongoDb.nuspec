@@ -2,7 +2,7 @@
 <package>
   <metadata>
       <id>NServiceBus.Persistence.MongoDb</id>
-      <version>5.0</version>
+      <version>$version$</version>
       <title>NServiceBus.Persistence.MongoDb</title>
       <authors>rhoffman</authors>
       <owners>rhoffman</owners>

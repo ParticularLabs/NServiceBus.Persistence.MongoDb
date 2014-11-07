@@ -26,7 +26,7 @@ package in your NServiceBus service host project. At the moment there are 2 opti
 
 
 ## Configuration ##
-The minimal configuration you need to get up and running in 2 steps:
+The minimal configuration you need to get up and running in 3 steps:
 
 **1** Instruct the service host to use MongoDb persistence 
 

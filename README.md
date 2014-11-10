@@ -30,26 +30,30 @@ The minimal configuration you need to get up and running in 3 steps:
 
 **1** Instruct the service host to use MongoDb persistence 
 
-	using NServiceBus;
-	using NServiceBus.Persistence.MongoDB;
-	
-	namespace Example
-	{
-	    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
-	    {
-	        public void Customize(BusConfiguration configuration)
-	        {
-	            configuration.UsePersistence<MongoDbPersistence>();
-	        }
-	    }
-	}
+```csharp
+using NServiceBus;
+using NServiceBus.Persistence.MongoDB;
+
+namespace Example
+{
+    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    {
+        public void Customize(BusConfiguration configuration)
+        {
+            configuration.UsePersistence<MongoDbPersistence>();
+        }
+    }
+}
+```
 
 **2** and add in the ```app.config``` following
 
-    <connectionStrings>
-	    <add name="NServiceBus/Persistence/MongoDB" 
-			connectionString="mongodb://localhost/databaseName"/>
-	</connectionStrings>
+```xml
+<connectionStrings>
+    <add name="NServiceBus/Persistence/MongoDB" 
+		connectionString="mongodb://localhost/databaseName"/>
+</connectionStrings>
+```
 
 **3** hit F5. Yes, is that simple.
 
@@ -57,17 +61,21 @@ The minimal configuration you need to get up and running in 3 steps:
 The persistence configuration model provides a reach API. This enables to override the default  
 connection string name by calling ```.SetConnectionStringName(string)``` extension method.
 
-	config
-		.UsePersistence<MongoDbPersistence>()
-		.SetConnectionStringName("SharedConnectionString");
+```csharp
+config
+	.UsePersistence<MongoDbPersistence>()
+	.SetConnectionStringName("SharedConnectionString");
+```
 
 If you are resolving your configuration setting from a different source at run-time which is  
 very common in cloud based deployments. Then you can use  ```.SetConnectionString(string)```  
 to provide it.
  
-	config
-		.UsePersistence<MongoDbPersistence>()
-		.SetConnectionString("mongodb://localhost/databaseName");
+```csharp
+config
+	.UsePersistence<MongoDbPersistence>()
+	.SetConnectionString("mongodb://localhost/databaseName");
+```
 
 ## Saga definition guideline##
 In order to get Sagas working correctly you need to enforce following
@@ -78,21 +86,22 @@ In order to get Sagas working correctly you need to enforce following
 
 Here is an example
 
-	public class OrderBillingSagaData : IContainSagaData
-	{
-	    [Unique]
-	    public string OrderId { get; set; }
-	
-	    [DocumentVersion]
-	    public int Version { get; set; }
-	
-	    public bool Canceled { get; set; }
-	
-	    public Guid Id { get; set; }
-	    public string Originator { get; set; }
-	    public string OriginalMessageId { get; set; }
-	} 
+```csharp
+public class OrderBillingSagaData : IContainSagaData
+{
+    [Unique]
+    public string OrderId { get; set; }
 
+    [DocumentVersion]
+    public int Version { get; set; }
+
+    public bool Canceled { get; set; }
+
+    public Guid Id { get; set; }
+    public string Originator { get; set; }
+    public string OriginalMessageId { get; set; }
+} 
+```
 ## Dealing with concurrency ##
 The key concurrency safeguards that sagas guarantee depend heavily on the underlying data store.   
 The two specific cases that NServiceBus relies on the underling data store are [concurrent access to   

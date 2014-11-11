@@ -1,4 +1,4 @@
-## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/60tbh0n2e62a87x4/branch/master?svg=true)](https://ci.appveyor.com/project/ruslander/nservicebus-persistence-mongodb/branch/master)##
+## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/60tbh0n2e62a87x4/branch/master?svg=true)](https://ci.appveyor.com/project/ruslander/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
 
 **NServiceBus** the most developer-friendly service bus for .NET.
 
@@ -16,12 +16,13 @@ No leaking abstractions, code against the well known Api.
 ## Install ##
 To enable MongoDb persistence capability install NServiceBus.Persistence. MongoDb   
 package in your NServiceBus service host project. At the moment there are 2 options 
-   
-1. from source
+
+1. NuGet package
+	*  Package Manager Console:  ```Install-Package NServiceBus.Persistence.MongoDb```   
+2. From source
 	* ```git clone https://github.com/tekmaven/NServiceBus.Persistence.MongoDb``` 
 	* ```.\build.cmd```
-2. nuget package
-	*  Package Manager Console:  ```Install-Package NServiceBus.Persistence.MongoDb```
+
 
 
 

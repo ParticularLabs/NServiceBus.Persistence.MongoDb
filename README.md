@@ -1,4 +1,4 @@
-## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/60tbh0n2e62a87x4/branch/master?svg=true)](https://ci.appveyor.com/project/ruslander/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
+## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/9cfq3u3vd0rf4kl2/branch/master?svg=true)](https://ci.appveyor.com/project/tekmaven/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
 
 **NServiceBus** the most developer-friendly service bus for .NET.
 

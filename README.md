@@ -47,7 +47,7 @@ namespace Example
 }
 ```
 
-**2** and add in the ```app.config``` following
+**2** Add in the ```app.config``` following
 
 ```xml
 <connectionStrings>
@@ -56,7 +56,7 @@ namespace Example
 </connectionStrings>
 ```
 
-**3** hit F5. Yes, is that simple.
+**3** Hit F5. Yes, is that simple.
 
 ## When default configuration is not an option ##
 The persistence configuration model provides a reach API. This enables to override the default  

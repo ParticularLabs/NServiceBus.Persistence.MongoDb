@@ -7,11 +7,10 @@ This package includes persistence implementations for:
 - Timeouts 
 - Subscriptions
 - Sagas
+- DataBus
 
 All the boilerplate code is encapsulated in the implementation details which we took care of.  
 No leaking abstractions, code against the well known Api.
-
-
 
 ## Install ##
 To enable MongoDb persistence capability install NServiceBus.Persistence. MongoDb   

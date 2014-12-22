@@ -30,6 +30,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
                         {
                             message.UserId = id; //console input
                             message.Message = Guid.NewGuid().ToString(); //random text
+                            message.DataBusData = new DataBusProperty<byte[]>(new byte[1024*1024*5]); //5MB
                         });
 
                         Logger.InfoFormat("Message sent with Id = {0}", id);
@@ -46,6 +47,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
     {
         public int UserId { get; set; }
         public string Message { get; set; }
+        public DataBusProperty<byte[]> DataBusData { get; set; }
     }
 
     public class TestSaga : Saga<TestSagaData>, IAmStartedByMessages<TestMessage>, IHandleTimeouts<TestSagaTimeout>
@@ -70,6 +72,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
 
             Data.UserId = message.UserId;
             Data.Message = message.Message;
+            Console.WriteLine(message.DataBusData.Value.Length);
 
             RequestTimeout<TestSagaTimeout>(TimeSpan.FromSeconds(10));
 

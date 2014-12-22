@@ -119,6 +119,28 @@ persisted data only if it has not been changed since it was retrieved. Since the
 is atomic, it will ensure that if there are multiple simultaneous updates to a saga, only one  
 will succeed.
 
+
+## DataBus ##
+Do you use [DataBus](http://docs.particular.net/nservicebus/attachments-databus-sample)?  We also supply an implimentation that is backed with MongoDB's GridFS.  To configure, just add this line to your busConfiguration:
+
+```csharp
+using NServiceBus;
+using NServiceBus.Persistence.MongoDB;
+
+namespace Example
+{
+    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    {
+        public void Customize(BusConfiguration configuration)
+        {
+            configuration.UsePersistence<MongoDbPersistence>();
+            configuration.UseDataBus<MongoDbDataBus>(); //add this line!
+        }
+    }
+}
+```
+
+
 ## Thanks to our contributors ##
 A major fork of https://github.com/justinsaraceno/NServicebus-Mongo.
 

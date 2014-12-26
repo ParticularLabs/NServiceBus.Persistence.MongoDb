@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MongoDB.Bson.Serialization;
 using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Saga;
@@ -33,8 +34,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             }
 
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var membermap = classmap.GetMemberMap(uniqueProperty.Name);
-            var uniqueFieldName = membermap.ElementName;
+            var uniqueFieldName = GetFieldName(classmap, uniqueProperty.Name);
 
             _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName);
         }
@@ -52,9 +52,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             var version = (int)versionProperty.GetValue(saga);
 
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var membermap = classmap.GetMemberMap(versionProperty.Name);
-            var versionFieldName = membermap.ElementName;
-
+            var versionFieldName = GetFieldName(classmap, versionProperty.Name);
 
             _repo.Update(saga, versionFieldName, version);
         }
@@ -67,8 +65,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public T Get<T>(string property, object value) where T : IContainSagaData
         {
             var classmap = BsonClassMap.LookupClassMap(typeof(T));
-            var membermap = classmap.GetMemberMap(property);
-            var propertyFieldName = membermap.ElementName;
+            var propertyFieldName = GetFieldName(classmap, property);
 
             var result = _repo.FindByFieldName<T>(propertyFieldName, value);
             return result;
@@ -77,6 +74,12 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public void Complete(IContainSagaData saga)
         {
             _repo.Remove(saga);
+        }
+
+        private string GetFieldName(BsonClassMap classMap, string property)
+        {
+            var element = classMap.AllMemberMaps.First(m => m.MemberName == property);
+            return element.ElementName;
         }
     }
 }

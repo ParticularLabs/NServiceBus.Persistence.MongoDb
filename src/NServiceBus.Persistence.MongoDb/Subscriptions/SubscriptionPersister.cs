@@ -12,26 +12,26 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
     public class SubscriptionPersister : ISubscriptionStorage
     {
-        private readonly MongoCollection<Subscription> _subscriptions;
+        private readonly IMongoCollection<Subscription> _subscriptions;
 
-        public SubscriptionPersister(MongoDatabase database)
+        public SubscriptionPersister(IMongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
         }
         
         public void Init()
         {
-            _subscriptions.EnsureIndex(s => s.Id, s => s.Subscribers);
+            _subscriptions.Indexes.CreateOneAsync(
+                new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers)).Wait();
         }
 
         public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)
         {
             foreach (var key in GetMessageTypeKeys(messageTypes))
             {
-                var query = Query<Subscription>.EQ(s => s.Id, key);
-                var update = Update<Subscription>.AddToSet(s => s.Subscribers, client.ToString());
+                var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, client.ToString());
 
-                _subscriptions.Update(query, update, UpdateFlags.Upsert);
+                _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() {IsUpsert = true}).Wait();
             }
         }
 
@@ -44,10 +44,9 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         {
             foreach (var key in GetMessageTypeKeys(messageTypes))
             {
-                var query = Query.And(Query<Subscription>.EQ(s => s.Id, key), Query<Subscription>.EQ(s => s.Subscribers, client.ToString()));
-                var update = Update<Subscription>.Pull(s => s.Subscribers, client.ToString());
-
-                _subscriptions.Update(query, update, UpdateFlags.None);
+                var update = new UpdateDefinitionBuilder<Subscription>().Pull(s => s.Subscribers, client.ToString());
+                
+                _subscriptions.UpdateOneAsync(s => s.Id == key && s.Subscribers.Contains(client.ToString()), update, new UpdateOptions() {IsUpsert = false}).Wait();
             }
         }
 
@@ -55,9 +54,10 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         {
             var keys = GetMessageTypeKeys(messageTypes);
 
-            return _subscriptions.AsQueryable()
-                .Where(s => keys.Contains(s.Id))
-                .ToList()
+            return _subscriptions.FindAsync(s => keys.Contains(s.Id))
+                .Result
+                .ToListAsync()
+                .Result
                 .SelectMany(s => s.Subscribers)
                 .Distinct()
                 .Select(Address.Parse);

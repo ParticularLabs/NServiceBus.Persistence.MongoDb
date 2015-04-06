@@ -11,7 +11,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
     public class MongoFixture
     {
         private SubscriptionPersister _storage;
-        private MongoDatabase _database;
+        private IMongoDatabase _database;
+        private MongoDatabase _database_old;
         private MongoClient _client;
 
         [SetUp]
@@ -20,7 +21,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
             _client = new MongoClient(connectionString);
-            _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
+            var dbName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+            _database = _client.GetDatabase(dbName);
+            _database_old = _client.GetServer().GetDatabase(dbName);
             _storage = new SubscriptionPersister(_database);
         }
 
@@ -31,18 +34,18 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 
         protected MongoCollection<Subscription> Subscriptions
         {
-            get { return _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
+            get { return _database_old.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
         }
 
         protected MongoDatabase Database
         {
-            get { return _database; }
+            get { return _database_old; }
         }
 
         [TearDown]
         public void TeardownContext()
         {
-            _database.Drop();
+            _database_old.Drop();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Configuration;
 using MongoDB.Driver;
 using NServiceBus.Features;
+using NServiceBus.ObjectBuilder;
 
 namespace NServiceBus.Persistence.MongoDB.Database
 {
@@ -54,14 +55,13 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
     internal static class ConfigureMongoDbPersistence
     {
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, MongoServer server, MongoDatabase database)
+        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, MongoDatabase databaseOld, IMongoDatabase database)
         {
             if (config == null) throw new ArgumentNullException("config");
-            if (server == null) throw new ArgumentNullException("server");
             if (database == null) throw new ArgumentNullException("database");
 
+            config.RegisterSingleton(databaseOld);
             config.RegisterSingleton(database);
-            config.RegisterSingleton(server);
             
             
             return config;
@@ -93,12 +93,15 @@ namespace NServiceBus.Persistence.MongoDB.Database
                 throw new ConfigurationErrorsException("Cannot configure Mongo Persister. Database name not present in the connection string.");
             }
 
+
+
             var client = new MongoClient(connectionString);
             var server = client.GetServer();
-            var database = server.GetDatabase(databaseName);
+            var databaseOld = server.GetDatabase(databaseName);
+            var database = client.GetDatabase(databaseName);
 
 
-            return MongoDbPersistence(config, server, database);
+            return MongoDbPersistence(config, databaseOld, database);
         }
 
         public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, Func<string> getConnectionString)

@@ -6,35 +6,42 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NServiceBus.Gateway.Deduplication;
+using NServiceBus.Persistence.MongoDB.Database;
 
 namespace NServiceBus.Persistence.MongoDB.Gateway
 {
+    
     public class Deduplication : IDeduplicateMessages
     {
-        private readonly MongoDatabase _database;
-        private readonly MongoCollection<GatewayMessage> _collection;
+        private readonly IMongoDatabase _database;
+        private readonly IMongoCollection<GatewayMessage> _collection;
 
-        public Deduplication(MongoDatabase database)
+        public Deduplication(IMongoDatabase database)
         {
             _database = database;
-            _collection = _database.GetCollection<GatewayMessage>("deduplication");
+            _collection = _database.GetCollection<GatewayMessage>(MongoPersistenceConstants.DeduplicationCollectionName);
         }
 
         public bool DeduplicateMessage(string clientId, DateTime timeReceived)
         {
             try
             {
-                _collection.Insert(new GatewayMessage()
+                _collection.WithWriteConcern(WriteConcern.W1).WithReadPreference(ReadPreference.Primary).InsertOneAsync(new GatewayMessage()
                 {
                     Id = clientId,
                     TimeReceived = timeReceived
-                });
+                }).Wait();
                 
                 return true;
             }
-            catch (MongoDuplicateKeyException ex)
+            catch (AggregateException aggEx)
             {
-                return false;
+                if (aggEx.GetBaseException().GetType() == typeof (MongoWriteException))
+                {
+                    return false;
+                }
+
+                throw;
             }
         }
     }

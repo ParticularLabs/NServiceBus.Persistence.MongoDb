@@ -22,7 +22,20 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             };
 
             SaveSaga(saga1);
-            Assert.Throws<MongoDuplicateKeyException>(() => SaveSaga(saga2));
+            try
+            {
+                SaveSaga(saga2);
+                Assert.Fail("SaveSaga should throw an exception");
+            }
+            catch (AggregateException aggEx)
+            {
+                Assert.AreEqual(typeof(MongoWriteException), aggEx.GetBaseException().GetType());
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Incorrect exception thrown.");
+            }
+            
         }
     }
 }

@@ -3,15 +3,17 @@ using System.Configuration;
 using System.Globalization;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using NServiceBus.Gateway.Deduplication;
 using NServiceBus.Persistence.MongoDB.Database;
+using NServiceBus.Persistence.MongoDB.Gateway;
 using NServiceBus.Persistence.MongoDB.Subscriptions;
 using NUnit.Framework;
 
-namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
+namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
 {
-    public class MongoFixture
+    public class MongorFixture
     {
-        private SubscriptionPersister _storage;
+        private IDeduplicateMessages _deduplication;
         private IMongoDatabase _database;
         private MongoClient _client;
         private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
@@ -23,17 +25,17 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
-            _storage = new SubscriptionPersister(_database);
+            _deduplication = new Deduplication(_database);
         }
 
-        protected SubscriptionPersister Storage
+        protected IDeduplicateMessages Deduplication
         {
-            get { return _storage; }
+            get { return _deduplication; }
         }
 
-        protected IMongoCollection<Subscription> Subscriptions
+        protected IMongoCollection<GatewayMessage> Collection
         {
-            get { return Database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
+            get { return Database.GetCollection<GatewayMessage>(MongoPersistenceConstants.DeduplicationCollectionName); }
         }
 
         protected IMongoDatabase Database

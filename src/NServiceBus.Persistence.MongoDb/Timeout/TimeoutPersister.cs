@@ -11,12 +11,12 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 {
     public class TimeoutPersister : IPersistTimeouts, IWantToRunWhenBusStartsAndStops
     {
-        private readonly MongoDatabase _database;
-        private readonly MongoCollection<TimeoutEntity> _collection;
+        private readonly IMongoDatabase _database;
+        private readonly IMongoCollection<TimeoutEntity> _collection;
         
         public string EndpointName { get; set; }
 
-        public TimeoutPersister(MongoDatabase database)
+        public TimeoutPersister(IMongoDatabase database)
         {
             _database = database;
             _collection = _database.GetCollection<TimeoutEntity>("timeouts");
@@ -25,7 +25,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         void IWantToRunWhenBusStartsAndStops.Start()
         {
-            _collection.EnsureIndex(t => t.SagaId);
+            _collection.Indexes.CreateOneAsync(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId)).Wait();
         }
 
         void IWantToRunWhenBusStartsAndStops.Stop()
@@ -38,24 +38,32 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             var now = DateTime.UtcNow;
 
+            var rBuilder = Builders<TimeoutEntity>.Filter;
+            var rQuery = rBuilder.Eq(t => t.Endpoint, EndpointName) &
+                         rBuilder.Gte(t => t.Time, startSlice) &
+                         rBuilder.Lte(t => t.Time, now);
+
+
             var results = _collection
-                .Find(Query.And(
-                    Query<TimeoutEntity>.EQ(t => t.Endpoint, EndpointName),
-                    Query<TimeoutEntity>.GTE(t => t.Time, startSlice),
-                    Query<TimeoutEntity>.LTE(t => t.Time, now)))
-                .SetFields(Fields<TimeoutEntity>.Include(t => t.Id).Include(t => t.Time))
-                .SetSortOrder(SortBy<TimeoutEntity>.Ascending(t => t.Time))
+                .Find(rQuery)
+                .Sort(Builders<TimeoutEntity>.Sort.Ascending(t => t.Time))
+                .Project(t => new { t.Id, t.Time })
+                .ToListAsync()
+                .Result
                 .Select(t => Tuple.Create(t.Id.ToString(), t.Time))
                 .ToList();
 
+            var ncBuilder = Builders<TimeoutEntity>.Filter;
+            var ncQuery = ncBuilder.Eq(t => t.Endpoint, EndpointName) &
+                          ncBuilder.Gte(t => t.Time, now);
+
             var startOfNextChunk = _collection
-                .Find(Query.And(
-                    Query<TimeoutEntity>.EQ(t => t.Endpoint, EndpointName),
-                    Query<TimeoutEntity>.GTE(t => t.Time, now)))
-                .SetFields(Fields<TimeoutEntity>.Exclude(t => t.Id).Include(t => t.Time))
-                .SetSortOrder(SortBy<TimeoutEntity>.Ascending(t => t.Time))
-                .SetLimit(1)
-                .SingleOrDefault();
+                .Find(ncQuery)
+                .Sort(Builders<TimeoutEntity>.Sort.Ascending(t => t.Time))
+                .Limit(1)
+                .Project(t => new { t.Time })
+                .SingleOrDefaultAsync()
+                .Result;
 
             if (startOfNextChunk != null)
             {
@@ -84,7 +92,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 timeoutId = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow);
             }
 
-            _collection.Insert(new TimeoutEntity
+            _collection.InsertOneAsync(new TimeoutEntity
             {
                 Id = timeoutId.ToString(),
                 Destination = timeout.Destination,
@@ -93,13 +101,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 Time = timeout.Time,
                 Headers = timeout.Headers,
                 Endpoint = timeout.OwningTimeoutManager,
-            });
+            }).Wait();
         }
 
         public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
         {
-            var query = Query<TimeoutEntity>.EQ(t => t.Id, timeoutId);
-            var entity = _collection.FindOne(query);
+            var query =  Builders<TimeoutEntity>.Filter.Eq(t => t.Id, timeoutId);
+            var entity = _collection.Find(query).FirstOrDefaultAsync().Result;
 
             if (entity == null)
             {
@@ -117,7 +125,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 Headers = entity.Headers,
             };
 
-            if (_collection.Remove(query).DocumentsAffected == 0)
+            if (_collection.DeleteOneAsync(query).Result.DeletedCount == 0)
             {
                 timeoutData = null;
                 return false;
@@ -128,7 +136,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         public void RemoveTimeoutBy(Guid sagaId)
         {
-            _collection.Remove(Query<TimeoutEntity>.EQ(t => t.SagaId, sagaId));
+            _collection.DeleteManyAsync(t => t.SagaId == sagaId).Wait();
         }
 
         

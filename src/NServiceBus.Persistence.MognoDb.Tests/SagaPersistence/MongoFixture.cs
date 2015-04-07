@@ -14,11 +14,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 {
     public class MongoFixture
     {
-        private MongoDatabase _database;
+        private IMongoDatabase _database;
         private MongoDbSagaRepository _repo;
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
+        private string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
         [SetUp]
         public virtual void SetupContext()
@@ -31,21 +32,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
             _client = new MongoClient(connectionString);
-            _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
+            _database = _client.GetDatabase(_databaseName);
             _repo = new MongoDbSagaRepository(_database);
 
             
             _sagaPersister = new SagaPersister(_repo);
-        }
-
-        protected MongoCollection<BsonDocument> Sagas
-        {
-            get { return _database.GetCollection<BsonDocument>(MongoPersistenceConstants.SagaCollectionName); }
-        }
-
-        protected MongoDatabase Database
-        {
-            get { return _database; }
         }
 
         protected ISagaPersister SagaPersister
@@ -56,7 +47,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         [TearDown]
         public void TeardownContext()
         {
-            _database.Drop();
+            _client.DropDatabaseAsync(_databaseName).Wait();
         }
 
         protected void SaveSaga<T>(T saga) where T : IContainSagaData
@@ -82,8 +73,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData
         {
             var versionName = _camelCaseConventionSet ? "version" : "Version";
-            var collection = _database.GetCollection(typeof(T).Name.ToLower());
-            collection.Update(Query.EQ("_id", sagaId), new UpdateBuilder().Set(versionName, version));
+            var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
+
+            collection.UpdateOneAsync(new QueryDocument("_id", sagaId),
+                new UpdateDocument("$set", new BsonDocument(versionName, version)))
+                .Wait();
         }
     }
 }

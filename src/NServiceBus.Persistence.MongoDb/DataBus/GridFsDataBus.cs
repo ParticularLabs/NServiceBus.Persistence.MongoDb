@@ -7,6 +7,7 @@ using NServiceBus.DataBus;
 
 namespace NServiceBus.Persistence.MongoDB.DataBus
 {
+    //TODO: MongoDB API upgrade blocked, waiting for https://jira.mongodb.org/browse/CSHARP-1191
     public class GridFsDataBus : IDataBus
     {
         private readonly MongoGridFS _fs;

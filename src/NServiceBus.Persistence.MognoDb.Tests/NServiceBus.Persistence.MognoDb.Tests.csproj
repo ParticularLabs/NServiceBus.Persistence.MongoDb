@@ -86,6 +86,8 @@
     <Compile Include="SubscriptionPersistence\When_receiving_a_unsubscription_message.cs" />
     <Compile Include="SubscriptionPersistence\When_using_semantic_versioning_of_messages.cs" />
     <None Include="TimeoutPersistence\Should_not_skip_timeouts.cs" />
+    <Compile Include="Gateway\Should_Dedupe.cs" />
+    <Compile Include="Gateway\MongoFixture.cs" />
     <Compile Include="TimeoutPersistence\When_fetching_timeouts_from_storage.cs" />
   </ItemGroup>
   <ItemGroup>

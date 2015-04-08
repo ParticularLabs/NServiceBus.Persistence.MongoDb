@@ -1,10 +1,6 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using NServiceBus.DataBus;
-using NServiceBus.Persistence.MongoDB.DataBus;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.DataBus

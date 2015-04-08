@@ -177,7 +177,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         /// <summary>
         /// Store the headers to preserve them across timeouts.
         /// </summary>
-        [global::MongoDB.Bson.Serialization.Attributes.BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        [global::MongoDB.Bson.Serialization.Attributes.BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
         public virtual Dictionary<string, string> Headers { get; set; }
 
         /// <summary>

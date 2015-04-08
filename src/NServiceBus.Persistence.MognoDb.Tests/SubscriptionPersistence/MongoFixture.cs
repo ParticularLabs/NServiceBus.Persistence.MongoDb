@@ -33,12 +33,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 
         protected IMongoCollection<Subscription> Subscriptions
         {
-            get { return Database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
-        }
-
-        protected IMongoDatabase Database
-        {
-            get { return _database; }
+            get { return _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
         }
 
         [TearDown]

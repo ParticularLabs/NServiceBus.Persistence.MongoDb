@@ -4,8 +4,6 @@ using System.Globalization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
-using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Persistence.MongoDB.Sagas;
 using NServiceBus.Saga;
 using NUnit.Framework;

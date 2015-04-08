@@ -5,7 +5,6 @@ using System.IO;
 using System.Text;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.DataBus;
-using NServiceBus.Persistence.MongoDB.Subscriptions;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
@@ -26,11 +25,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             _client = new MongoClient(connectionString);
             _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
             _gridFsDataBus = new GridFsDataBus(_database);
-        }
-
-        protected MongoDatabase Database
-        {
-            get { return _database; }
         }
 
         protected GridFsDataBus GridFsDataBus

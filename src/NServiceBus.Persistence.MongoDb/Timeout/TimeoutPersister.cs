@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Options;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Database;
@@ -175,6 +177,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         /// <summary>
         /// Store the headers to preserve them across timeouts.
         /// </summary>
+        [global::MongoDB.Bson.Serialization.Attributes.BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
         public virtual Dictionary<string, string> Headers { get; set; }
 
         /// <summary>

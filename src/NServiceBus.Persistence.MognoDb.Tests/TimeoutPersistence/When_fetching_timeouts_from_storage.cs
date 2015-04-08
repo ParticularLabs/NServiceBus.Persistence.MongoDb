@@ -15,19 +15,29 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
     public class When_fetching_timeouts_from_storage : MongoFixture
     {
         [Test]
+        public void Should_persist_with_common_nservicebus_headers()
+        {
+            var nextTime = DateTime.UtcNow.AddHours(1);
+
+            Storage.Add(new TimeoutData
+            {
+                Time = nextTime,
+                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                SagaId = Guid.NewGuid(),
+                State = new byte[] { 0, 0, 133 },
+                Headers = new Dictionary<string, string> { { Headers.MessageId, Guid.NewGuid().ToString() }, { Headers.NServiceBusVersion, Guid.NewGuid().ToString() }, { Headers.OriginatingAddress, Guid.NewGuid().ToString() } },
+                OwningTimeoutManager = "MyTestEndpoint",
+            });
+        }
+
+        [Test]
         public void Should_return_the_complete_list_of_timeouts()
         {
-            
-            var persister = new TimeoutPersister(Database)
-            {
-                EndpointName = "MyTestEndpoint",
-            };
-
             const int numberOfTimeoutsToAdd = 10;
 
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
-                persister.Add(new TimeoutData
+                Storage.Add(new TimeoutData
                 {
                     Time = DateTime.UtcNow.AddHours(-1),
                     Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
@@ -39,22 +49,15 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
             }
             
             DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());
+            Assert.AreEqual(numberOfTimeoutsToAdd, Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());
         }
 
         [Test]
         public void Should_return_the_next_time_of_retrieval()
         {
-
-
-            var persister = new TimeoutPersister(Database)
-            {
-                EndpointName = "MyTestEndpoint",
-            };
-
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            persister.Add(new TimeoutData
+            Storage.Add(new TimeoutData
             {
                 Time = nextTime,
                 Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
@@ -65,7 +68,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
             });
 
             DateTime nextTimeToRunQuery;
-            persister.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
 
             Assert.IsTrue((nextTime - nextTimeToRunQuery).TotalSeconds < 1);
         }

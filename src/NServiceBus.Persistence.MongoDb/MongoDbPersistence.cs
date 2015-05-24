@@ -20,11 +20,12 @@ namespace NServiceBus.Persistence.MongoDB
             {
                 s.EnableFeatureByDefault<MongoDbStorage>();
             });
+            
 
-            Supports(Storage.GatewayDeduplication, s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
-            Supports(Storage.Timeouts, s => s.EnableFeatureByDefault<MongoDbTimeoutStorage>());
-            Supports(Storage.Sagas, s => s.EnableFeatureByDefault<MongoDbSagaStorage>());
-            Supports(Storage.Subscriptions, s => s.EnableFeatureByDefault<MongoDbSubscriptionStorage>());
+            Supports<StorageType.GatewayDeduplication>(s => s.EnableFeatureByDefault<MongoDbGatewayDeduplication>());
+            Supports<StorageType.Timeouts>(s => s.EnableFeatureByDefault<MongoDbTimeoutStorage>());
+            Supports<StorageType.Sagas>(s => s.EnableFeatureByDefault<MongoDbSagaStorage>());
+            Supports<StorageType.Subscriptions>(s => s.EnableFeatureByDefault<MongoDbSubscriptionStorage>());
         }
     }
 }

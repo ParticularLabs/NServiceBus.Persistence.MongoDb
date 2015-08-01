@@ -53,6 +53,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _sagaPersister.Save(saga);
         }
 
+        protected T LoadSaga<T>(Guid id) where T : IContainSagaData
+        {
+            return _sagaPersister.Get<T>(id);
+        }
+
         protected void CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
         {
             var saga = _sagaPersister.Get<T>(sagaId);

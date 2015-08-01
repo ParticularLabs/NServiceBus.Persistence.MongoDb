@@ -46,7 +46,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 
             foreach (var field in bsonDoc.Where(field => field.Name != versionFieldName && field.Name != "_id"))
             {
-                update.Set(field.Name, field.Value);
+                update = update.Set(field.Name, field.Value);
             }
 
 

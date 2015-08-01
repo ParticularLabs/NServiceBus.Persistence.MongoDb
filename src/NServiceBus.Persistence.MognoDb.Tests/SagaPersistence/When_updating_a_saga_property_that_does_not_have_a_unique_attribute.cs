@@ -23,6 +23,26 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.NonUniqueString = "notUnique2");
         }
+
+        [Test]
+        public void It_should_really_really_like_actually_persist_the_changes()
+        {
+            var saga1 = new SagaWithoutUniqueProperties()
+            {
+                Id = Guid.NewGuid(),
+                NonUniqueString = "originalValue"
+            };
+
+            SaveSaga(saga1);
+
+            UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+            {
+                s.NonUniqueString = "newValue";
+            });
+
+            saga1 = LoadSaga<SagaWithoutUniqueProperties>(saga1.Id);
+            Assert.AreEqual("newValue", saga1.NonUniqueString);
+        }
     }
 
     public class When_updating_a_saga_without_unique_properties : MongoFixture

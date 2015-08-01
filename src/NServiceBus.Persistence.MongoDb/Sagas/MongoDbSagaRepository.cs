@@ -55,7 +55,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
                 update,
                 new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After}).Result;
 
-            if (modifyResult == null)
+            if (modifyResut == null)
             {
                 throw new SagaMongoDbConcurrentUpdateException(version);
             }

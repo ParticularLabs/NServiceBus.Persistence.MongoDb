@@ -9,17 +9,15 @@ using NServiceBus.Timeout.Core;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
-    public class TimeoutPersister : IPersistTimeouts, IWantToRunWhenBusStartsAndStops
+    public class TimeoutPersister : IPersistTimeouts, IPersistTimeoutsV2, IWantToRunWhenBusStartsAndStops
     {
-        private readonly IMongoDatabase _database;
         private readonly IMongoCollection<TimeoutEntity> _collection;
         
         public string EndpointName { get; set; }
 
         public TimeoutPersister(IMongoDatabase database)
         {
-            _database = database;
-            _collection = _database.GetCollection<TimeoutEntity>("timeouts");
+            _collection = database.GetCollection<TimeoutEntity>("timeouts");
         }
 
 
@@ -32,7 +30,6 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
 
         }
-        
 
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
         {
@@ -103,6 +100,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 Time = timeout.Time,
                 Headers = timeout.Headers,
                 Endpoint = timeout.OwningTimeoutManager,
+                OwningTimeoutManager = timeout.OwningTimeoutManager
             }).Wait();
         }
 
@@ -140,8 +138,17 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             _collection.DeleteManyAsync(t => t.SagaId == sagaId).Wait();
         }
-
         
+        public bool TryRemove(string timeoutId)
+        {
+            TimeoutData timeoutData;
+            return TryRemove(timeoutId, out timeoutData);
+        }
+        public TimeoutData Peek(string timeoutId)
+        {
+            var timeoutEntity = _collection.AsQueryable().SingleOrDefault(e => e.Id == timeoutId);
+            return timeoutEntity?.ToTimeoutData();
+        }
     }
     
     /// <summary>
@@ -184,5 +191,23 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         /// Timeout endpoint name.
         /// </summary>
         public virtual string Endpoint { get; set; }
+
+        /// <summary>
+        ///     The timeout manager that owns this particular timeout
+        /// </summary>
+        public string OwningTimeoutManager { get; set; }
+
+        public TimeoutData ToTimeoutData()
+        {
+            return new TimeoutData
+            {
+                Destination = Destination,
+                Headers = Headers,
+                OwningTimeoutManager = OwningTimeoutManager,
+                SagaId = SagaId,
+                State = State,
+                Time = Time
+            };
+        }
     }
 }

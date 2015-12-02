@@ -5,8 +5,6 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
-using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Timeout.Core;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout

@@ -7,28 +7,28 @@ using NServiceBus.DataBus;
 
 namespace NServiceBus.Persistence.MongoDB.DataBus
 {
-    //TODO: MongoDB API upgrade blocked, waiting for https://jira.mongodb.org/browse/CSHARP-1191
     public class GridFsDataBus : IDataBus
     {
-        private readonly MongoGridFS _fs;
+        private readonly IGridFSBucket _fs;
 
-        public GridFsDataBus(MongoDatabase database)
+        public GridFsDataBus(IMongoDatabase database)
         {
-            _fs = database.GridFS;
+            _fs = new GridFSBucket(database);
         }
 
         public Stream Get(string key)
         {
-            return _fs.OpenRead(key);
+            var stream = new MemoryStream();
+            _fs.DownloadToStreamAsync(ObjectId.Parse(key), stream).Wait();
+            stream.Position = 0;
+            return stream;
         }
 
         public string Put(Stream stream, TimeSpan timeToBeReceived)
         {
-            var key = Guid.NewGuid().ToString();
+            var key = _fs.UploadFromStreamAsync(Guid.NewGuid().ToString(), stream).Result;
 
-            _fs.Upload(stream, key);
-
-            return key;
+            return key.ToString();
         }
 
         public void Start()

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
-using MongoDB.Driver.Linq;
 using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;

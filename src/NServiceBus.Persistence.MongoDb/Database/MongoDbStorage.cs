@@ -55,12 +55,11 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
     internal static class ConfigureMongoDbPersistence
     {
-        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, MongoDatabase databaseOld, IMongoDatabase database)
+        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, IMongoDatabase database)
         {
-            if (config == null) throw new ArgumentNullException("config");
-            if (database == null) throw new ArgumentNullException("database");
-
-            config.RegisterSingleton(databaseOld);
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            if (database == null) throw new ArgumentNullException(nameof(database));
+            
             config.RegisterSingleton(database);
             
             
@@ -96,12 +95,10 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
 
             var client = new MongoClient(connectionString);
-            var server = client.GetServer();
-            var databaseOld = server.GetDatabase(databaseName);
             var database = client.GetDatabase(databaseName);
 
 
-            return MongoDbPersistence(config, databaseOld, database);
+            return MongoDbPersistence(config, database);
         }
 
         public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, Func<string> getConnectionString)

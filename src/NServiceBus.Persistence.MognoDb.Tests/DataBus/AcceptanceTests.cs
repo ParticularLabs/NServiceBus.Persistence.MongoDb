@@ -17,7 +17,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             var key = Put(content, TimeSpan.MaxValue);
             using (var stream = GridFsDataBus.Get(key))
             {
-                Assert.AreEqual(new StreamReader(stream).ReadToEnd(), content);
+                Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
             }
         }
 
@@ -32,7 +32,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             {
                 using (var stream = GridFsDataBus.Get(key))
                 {
-                    Assert.AreEqual(new StreamReader(stream).ReadToEnd(), content);
+                    Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
                 }
             });
         }

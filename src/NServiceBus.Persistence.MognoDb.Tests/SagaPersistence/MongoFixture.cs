@@ -78,8 +78,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             var versionName = _camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
 
-            collection.UpdateOneAsync(new QueryDocument("_id", sagaId),
-                new UpdateDocument("$set", new BsonDocument(versionName, version)))
+            collection.UpdateOneAsync(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
+                new BsonDocument("$set", new BsonDocument(versionName, version))))
                 .Wait();
         }
     }

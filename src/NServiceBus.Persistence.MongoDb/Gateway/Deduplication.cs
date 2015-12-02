@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NServiceBus.Gateway.Deduplication;
 using NServiceBus.Persistence.MongoDB.Database;
 

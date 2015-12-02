@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Saga;
 
@@ -17,7 +16,8 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 
         public T FindById<T>(Guid id)
         {
-            var doc = GetCollection<T>().Find(new QueryDocument("_id", id)).FirstOrDefaultAsync().Result;
+            
+            var doc = GetCollection<T>().Find(new BsonDocument("_id", id)).FirstOrDefaultAsync().Result;
             return Deserialize<T>(doc);
         }
 
@@ -26,7 +26,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 
         public T FindByFieldName<T>(string fieldName, object value)
         {
-            var doc = GetCollection<T>().Find(new QueryDocument(fieldName, BsonValue.Create(value))).FirstOrDefaultAsync().Result;
+            var doc = GetCollection<T>().Find(new BsonDocument(fieldName, BsonValue.Create(value))).FirstOrDefaultAsync().Result;
             return Deserialize<T>(doc);
         }
 
@@ -64,7 +64,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public void Remove(IContainSagaData saga)
         {
             var collection = GetCollection(saga.GetType());
-            collection.DeleteOneAsync(new QueryDocument("_id", saga.Id)).Wait();
+            collection.DeleteOneAsync(new BsonDocument("_id", saga.Id)).Wait();
         }
 
         public void Insert(object entity)

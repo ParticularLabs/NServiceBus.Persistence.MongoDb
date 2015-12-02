@@ -12,9 +12,10 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
     public class MongoFixture
     {
         
-        private MongoDatabase _database;
+        private IMongoDatabase _database;
         private MongoClient _client;
         private GridFsDataBus _gridFsDataBus;
+        private string _databaseName;
 
 
         [SetUp]
@@ -23,7 +24,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
 
             _client = new MongoClient(connectionString);
-            _database = _client.GetServer().GetDatabase("Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture));
+            _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+            _database = _client.GetDatabase(_databaseName);
             _gridFsDataBus = new GridFsDataBus(_database);
         }
 
@@ -44,7 +46,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         [TearDown]
         public void TeardownContext()
         {
-            _database.Drop();
+            _client.DropDatabaseAsync(_databaseName).Wait();
         }
     }
 }

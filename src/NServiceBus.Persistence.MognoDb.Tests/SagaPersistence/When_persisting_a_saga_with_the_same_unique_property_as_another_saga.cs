@@ -31,10 +31,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             {
                 Assert.AreEqual(typeof(MongoWriteException), aggEx.GetBaseException().GetType());
             }
-            catch (Exception ex)
-            {
-                Assert.Fail("Incorrect exception thrown.");
-            }
             
         }
     }

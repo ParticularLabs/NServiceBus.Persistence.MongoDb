@@ -59,13 +59,15 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             var ncQuery = ncBuilder.Eq(t => t.Endpoint, EndpointName) &
                           ncBuilder.Gte(t => t.Time, now);
 
-            var startOfNextChunk = _collection
+            var startOfNextChunkQry = _collection
                 .Find(ncQuery)
                 .Sort(Builders<TimeoutEntity>.Sort.Ascending(t => t.Time))
                 .Limit(1)
                 .Project(t => new { t.Time })
-                .SingleOrDefaultAsync()
+                .ToListAsync()
                 .Result;
+
+            var startOfNextChunk = startOfNextChunkQry.SingleOrDefault();
 
             if (startOfNextChunk != null)
             {

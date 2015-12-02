@@ -33,6 +33,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
                             message.DataBusData = new DataBusProperty<byte[]>(new byte[1024*1024*5]); //5MB
                         });
 
+
                         Logger.InfoFormat("Message sent with Id = {0}", id);
                     }
                     else

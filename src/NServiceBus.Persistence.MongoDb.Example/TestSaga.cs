@@ -71,7 +71,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
             }
 
             Data.UserId = message.UserId;
-            Data.Message = message.Message;
+            Data.Message = $"{Data.Version} - {message.Message}";
             Console.WriteLine(message.DataBusData.Value.Length);
 
             RequestTimeout<TestSagaTimeout>(TimeSpan.FromSeconds(10));

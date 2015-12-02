@@ -78,7 +78,8 @@
     <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_related_entities.cs" />
     <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_another_saga.cs" />
     <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
-    <Compile Include="SagaPersistence\When_updating_a_saga_property_that_does_not_have_a_unique_attribute.cs" />
+    <Compile Include="SagaPersistence\When_updating_a_saga_with_unique_properties.cs" />
+    <Compile Include="SagaPersistence\When_updating_a_saga_without_unique_properties.cs" />
     <Compile Include="SubscriptionPersistence\MongoFixture.cs" />
     <Compile Include="SubscriptionPersistence\TestData.cs" />
     <Compile Include="SubscriptionPersistence\When_listing_subscribers_for_message_types.cs" />

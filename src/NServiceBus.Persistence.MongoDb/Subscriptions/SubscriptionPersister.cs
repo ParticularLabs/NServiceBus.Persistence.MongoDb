@@ -19,8 +19,8 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         
         public void Init()
         {
-            _subscriptions.Indexes.CreateOneAsync(
-                new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers)).Wait();
+            _subscriptions.Indexes.CreateOne(
+                new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers));
         }
 
         public void Subscribe(Address client, IEnumerable<MessageType> messageTypes)
@@ -29,7 +29,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
             {
                 var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, client.ToString());
 
-                _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() {IsUpsert = true}).Wait();
+                _subscriptions.UpdateOne(s => s.Id == key, update, new UpdateOptions() {IsUpsert = true});
             }
         }
 
@@ -44,7 +44,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
             {
                 var update = new UpdateDefinitionBuilder<Subscription>().Pull(s => s.Subscribers, client.ToString());
                 
-                _subscriptions.UpdateOneAsync(s => s.Id == key && s.Subscribers.Contains(client.ToString()), update, new UpdateOptions() {IsUpsert = false}).Wait();
+                _subscriptions.UpdateOne(s => s.Id == key && s.Subscribers.Contains(client.ToString()), update, new UpdateOptions() {IsUpsert = false});
             }
         }
 
@@ -52,10 +52,8 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         {
             var keys = GetMessageTypeKeys(messageTypes);
 
-            return _subscriptions.FindAsync(s => keys.Contains(s.Id))
-                .Result
-                .ToListAsync()
-                .Result
+            return _subscriptions.Find(s => keys.Contains(s.Id))
+                .ToList()
                 .SelectMany(s => s.Subscribers)
                 .Distinct()
                 .Select(Address.Parse);

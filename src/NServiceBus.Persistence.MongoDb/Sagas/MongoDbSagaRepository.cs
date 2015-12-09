@@ -17,7 +17,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public T FindById<T>(Guid id)
         {
             
-            var doc = GetCollection<T>().Find(new BsonDocument("_id", id)).FirstOrDefaultAsync().Result;
+            var doc = GetCollection<T>().Find(new BsonDocument("_id", id)).FirstOrDefault();
             return Deserialize<T>(doc);
         }
 
@@ -26,7 +26,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
 
         public T FindByFieldName<T>(string fieldName, object value)
         {
-            var doc = GetCollection<T>().Find(new BsonDocument(fieldName, BsonValue.Create(value))).FirstOrDefaultAsync().Result;
+            var doc = GetCollection<T>().Find(new BsonDocument(fieldName, BsonValue.Create(value))).FirstOrDefault();
             return Deserialize<T>(doc);
         }
 
@@ -50,10 +50,10 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             }
 
 
-            var modifyResult = collection.FindOneAndUpdateAsync(
+            var modifyResult = collection.FindOneAndUpdate(
                 filter, 
                 update,
-                new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After}).Result;
+                new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After});
 
             if (modifyResult == null)
             {
@@ -64,13 +64,13 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public void Remove(IContainSagaData saga)
         {
             var collection = GetCollection(saga.GetType());
-            collection.DeleteOneAsync(new BsonDocument("_id", saga.Id)).Wait();
+            collection.DeleteOne(new BsonDocument("_id", saga.Id));
         }
 
         public void Insert(object entity)
         {
             var collection = GetCollection(entity.GetType());
-            collection.InsertOneAsync(entity.ToBsonDocument()).Wait();
+            collection.InsertOne(entity.ToBsonDocument());
         }
 
     }

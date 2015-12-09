@@ -25,17 +25,19 @@ namespace NServiceBus.Persistence.MongoDB.Gateway
         {
             try
             {
-                _collection.WithWriteConcern(WriteConcern.W1).WithReadPreference(ReadPreference.Primary).InsertOneAsync(new GatewayMessage()
+                _collection.WithWriteConcern(WriteConcern.W1).WithReadPreference(ReadPreference.Primary).InsertOne(new GatewayMessage()
                 {
                     Id = clientId,
                     TimeReceived = timeReceived
-                }).Wait();
+                });
                 
                 return true;
             }
-            catch (AggregateException aggEx)
+            catch (MongoWriteException aggEx)
             {
-                if (aggEx.GetBaseException().GetType() == typeof (MongoWriteException))
+                // Check for "E11000 duplicate key error"
+                // https://docs.mongodb.org/manual/reference/command/insert/
+                if (aggEx.WriteError?.Code == 11000)
                 {
                     return false;
                 }

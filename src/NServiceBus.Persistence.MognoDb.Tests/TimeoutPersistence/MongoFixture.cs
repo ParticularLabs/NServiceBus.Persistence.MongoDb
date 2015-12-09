@@ -39,7 +39,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
         public void TeardownContext()
         {
             ((IWantToRunWhenBusStartsAndStops)_storage).Stop();
-            _client.DropDatabaseAsync(_databaseName).Wait();
+            _client.DropDatabase(_databaseName);
         }
     }
 }

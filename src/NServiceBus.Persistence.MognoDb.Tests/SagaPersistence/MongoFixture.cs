@@ -45,7 +45,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         [TearDown]
         public void TeardownContext()
         {
-            _client.DropDatabaseAsync(_databaseName).Wait();
+            _client.DropDatabase(_databaseName);
         }
 
         protected void SaveSaga<T>(T saga) where T : IContainSagaData
@@ -78,9 +78,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             var versionName = _camelCaseConventionSet ? "version" : "Version";
             var collection = _database.GetCollection<BsonDocument>(typeof(T).Name.ToLower());
 
-            collection.UpdateOneAsync(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
-                new BsonDocument("$set", new BsonDocument(versionName, version))))
-                .Wait();
+            collection.UpdateOne(new BsonDocument("_id", sagaId), new BsonDocumentUpdateDefinition<BsonDocument>(
+                new BsonDocument("$set", new BsonDocument(versionName, version))));
         }
     }
 }

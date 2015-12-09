@@ -19,15 +19,14 @@ namespace NServiceBus.Persistence.MongoDB.DataBus
         public Stream Get(string key)
         {
             var stream = new MemoryStream();
-            _fs.DownloadToStreamAsync(ObjectId.Parse(key), stream).Wait();
+            _fs.DownloadToStream(ObjectId.Parse(key), stream);
             stream.Position = 0;
             return stream;
         }
 
         public string Put(Stream stream, TimeSpan timeToBeReceived)
         {
-            var key = _fs.UploadFromStreamAsync(Guid.NewGuid().ToString(), stream).Result;
-
+            var key = _fs.UploadFromStream(Guid.NewGuid().ToString(), stream);
             return key.ToString();
         }
 

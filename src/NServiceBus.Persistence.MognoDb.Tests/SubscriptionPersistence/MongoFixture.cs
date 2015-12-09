@@ -39,7 +39,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [TearDown]
         public void TeardownContext()
         {
-            _client.DropDatabaseAsync(_databaseName).Wait();
+            _client.DropDatabase(_databaseName);
         }
     }
 
@@ -47,7 +47,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
     {
         public static long Count<TDocument>(this IMongoCollection<TDocument> collection)
         {
-            return collection.CountAsync(new BsonDocument()).Result;
+            return collection.Count(new BsonDocument());
         }
     }
 }

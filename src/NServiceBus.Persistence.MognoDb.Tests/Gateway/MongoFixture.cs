@@ -35,7 +35,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         [TearDown]
         public void TeardownContext()
         {
-            _client.DropDatabaseAsync(_databaseName).Wait();
+            _client.DropDatabase(_databaseName);
         }
     }
 }

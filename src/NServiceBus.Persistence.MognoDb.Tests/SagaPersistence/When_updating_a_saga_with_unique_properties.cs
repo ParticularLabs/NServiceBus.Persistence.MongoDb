@@ -44,9 +44,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                     NonUniqueString = "notUnique"
                 });
             }
-            catch (AggregateException aggEx)
+            catch (MongoWriteException aggEx)
             {
-                Assert.AreEqual(typeof(MongoWriteException), aggEx.GetBaseException().GetType());
+                // Check for "E11000 duplicate key error"
+                // https://docs.mongodb.org/manual/reference/command/insert/
+
+                Assert.AreEqual(11000, aggEx.WriteError?.Code);
                 return;
             }
 

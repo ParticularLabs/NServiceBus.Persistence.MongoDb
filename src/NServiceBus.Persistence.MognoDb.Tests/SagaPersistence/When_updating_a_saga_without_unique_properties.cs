@@ -30,7 +30,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
 
         [Test]
-        [ExpectedException(typeof(SagaMongoDbConcurrentUpdateException))]
         public void It_should_throw_when_version_changed()
         {
             var saga1 = new SagaWithoutUniqueProperties()
@@ -42,13 +41,16 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             SaveSaga(saga1);
 
-            UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+            Assert.Throws<SagaMongoDbConcurrentUpdateException>(() =>
             {
-                Assert.AreEqual(s.Version, 0);
-                s.NonUniqueString = "notUnique2";
-                s.UniqueString = "whatever2";
+                UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+                {
+                    Assert.AreEqual(s.Version, 0);
+                    s.NonUniqueString = "notUnique2";
+                    s.UniqueString = "whatever2";
 
-                ChangeSagaVersionManually<SagaWithoutUniqueProperties>(s.Id, 1);
+                    ChangeSagaVersionManually<SagaWithoutUniqueProperties>(s.Id, 1);
+                });
             });
         }
     }

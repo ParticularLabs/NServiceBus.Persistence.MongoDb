@@ -1,32 +1,21 @@
 ## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/9cfq3u3vd0rf4kl2/branch/master?svg=true)](https://ci.appveyor.com/project/tekmaven/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
 
-**NServiceBus** is the most developer-friendly service bus for .NET.  This package includes MongoDB persistence implementations for:
+This package includes MongoDB persistence implementations for NServiceBus:
 
 - Timeouts 
 - Subscriptions
 - Sagas
 - DataBus
 
-All the boilerplate code is encapsulated in the implementation details which we took care of.  
-No leaking abstractions, code against the well known Api.
-
 ## Install ##
-To enable MongoDb persistence capability install NServiceBus.Persistence. MongoDb   
-package in your NServiceBus service host project. At the moment there are 2 options 
+Add the `NServiceBus.Persistence.MongoDb` package to your NServiceBus service host project. 
 
-1. NuGet package
-	*  Package Manager Console:  ```Install-Package NServiceBus.Persistence.MongoDb```   
-2. From source
-	* ```git clone https://github.com/tekmaven/NServiceBus.Persistence.MongoDb``` 
-	* ```.\build.cmd```
-
-
-
+ ```Install-Package NServiceBus.Persistence.MongoDb```   
 
 ## Configuration ##
 The minimal configuration you need to get up and running in 3 steps:
 
-**1** Instruct the service host to use MongoDb persistence 
+**1** Set the `BusConfiguration` object to use `MongoDbPersistence`
 
 ```csharp
 using NServiceBus;
@@ -44,7 +33,7 @@ namespace Example
 }
 ```
 
-**2** Add in the ```app.config``` following
+**2** Add your MongoDB connection string to your ```app.config```:
 
 ```xml
 <connectionStrings>
@@ -53,9 +42,9 @@ namespace Example
 </connectionStrings>
 ```
 
-**3** Hit F5. Yes, is that simple.
+**3** Hit F5. Yes, it is that simple.
 
-## When default configuration is not an option ##
+## Custom Connection String Options ##
 The persistence configuration model provides a reach API. This enables to override the default  
 connection string name by calling ```.SetConnectionStringName(string)``` extension method.
 
@@ -137,6 +126,8 @@ namespace Example
 }
 ```
 
+## NServiceBus Documentation Sample
+http://docs.particular.net/samples/mongodb/
 
 ## Thanks to our contributors ##
 [@ruslanrusu](https://twitter.com/ruslanrusu)  

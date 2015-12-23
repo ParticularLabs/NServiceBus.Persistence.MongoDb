@@ -13,8 +13,6 @@ Add the `NServiceBus.Persistence.MongoDb` package to your NServiceBus service ho
  ```Install-Package NServiceBus.Persistence.MongoDb```   
 
 ## Configuration ##
-The minimal configuration you need to get up and running in 3 steps:
-
 **1** Set the `BusConfiguration` object to use `MongoDbPersistence`
 
 ```csharp

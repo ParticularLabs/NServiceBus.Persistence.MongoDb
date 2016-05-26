@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
@@ -7,15 +8,15 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
     public class When_using_semantic_versioning_of_messages : MongoFixture
     {
         [Test]
-        public void Only_changes_in_major_version_should_effect_subscribers()
+        public async Task Only_changes_in_major_version_should_effect_subscribers()
         {
-            Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA);
-            Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageAv11);
-            Storage.Subscribe(TestClients.ClientC, MessageTypes.MessageAv2);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null);
+            await Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageAv11, null);
+            await Storage.Subscribe(TestClients.ClientC, MessageTypes.MessageAv2, null);
 
-            Assert.AreEqual(2, Storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA).Count());
-            Assert.AreEqual(2, Storage.GetSubscriberAddressesForMessage(MessageTypes.MessageAv11).Count());
-            Assert.AreEqual(1, Storage.GetSubscriberAddressesForMessage(MessageTypes.MessageAv2).Count());
+            Assert.AreEqual(2, (await Storage.GetSubscriberAddressesForMessage(new[] {MessageTypes.MessageA }, null)).Count());
+            Assert.AreEqual(2, (await Storage.GetSubscriberAddressesForMessage(new[] {MessageTypes.MessageAv11 }, null)).Count());
+            Assert.AreEqual(1, (await Storage.GetSubscriberAddressesForMessage(new[] { MessageTypes.MessageAv2}, null)).Count());
         }
     }
 }

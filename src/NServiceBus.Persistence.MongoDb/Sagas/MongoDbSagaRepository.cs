@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Database;
-using NServiceBus.Saga;
 
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
@@ -14,32 +14,25 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         {
         }
 
-        public T FindById<T>(Guid id)
+        public async Task<T> FindById<T>(Guid id)
         {
-            
-            var doc = GetCollection<T>().Find(new BsonDocument("_id", id)).FirstOrDefault();
+            var doc = await GetCollection<T>().Find(new BsonDocument("_id", id)).FirstOrDefaultAsync().ConfigureAwait(false);
             return Deserialize<T>(doc);
         }
 
-        
-
-
-        public T FindByFieldName<T>(string fieldName, object value)
+        public async Task<T> FindByFieldName<T>(string fieldName, object value)
         {
-            var doc = GetCollection<T>().Find(new BsonDocument(fieldName, BsonValue.Create(value))).FirstOrDefault();
+            var doc = await GetCollection<T>().Find(new BsonDocument(fieldName, BsonValue.Create(value))).Limit(1).FirstOrDefaultAsync().ConfigureAwait(false);
             return Deserialize<T>(doc);
         }
 
-        public void Update(IContainSagaData saga, string versionFieldName, int version)
+        public async Task Update(IContainSagaData saga, string versionFieldName, int version)
         {
             var collection = GetCollection(saga.GetType());
 
             var fbuilder = Builders<BsonDocument>.Filter;
             var filter = fbuilder.Eq("_id", saga.Id) & fbuilder.Eq(versionFieldName, version);
-
             
-
-
             var bsonDoc = saga.ToBsonDocument();
             var ubuilder = Builders<BsonDocument>.Update;
             var update = ubuilder.Inc(versionFieldName, 1);
@@ -49,11 +42,10 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
                 update = update.Set(field.Name, field.Value);
             }
 
-
-            var modifyResult = collection.FindOneAndUpdate(
+            var modifyResult = await collection.FindOneAndUpdateAsync(
                 filter, 
                 update,
-                new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After});
+                new FindOneAndUpdateOptions<BsonDocument> {IsUpsert = false, ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
 
             if (modifyResult == null)
             {
@@ -61,17 +53,16 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             }
         }
 
-        public void Remove(IContainSagaData saga)
+        public Task Remove(IContainSagaData saga)
         {
             var collection = GetCollection(saga.GetType());
-            collection.DeleteOne(new BsonDocument("_id", saga.Id));
+            return collection.DeleteOneAsync(new BsonDocument("_id", saga.Id));
         }
 
-        public void Insert(object entity)
+        public Task Insert(object entity)
         {
             var collection = GetCollection(entity.GetType());
-            collection.InsertOne(entity.ToBsonDocument());
+            return collection.InsertOneAsync(entity.ToBsonDocument());
         }
-
     }
 }

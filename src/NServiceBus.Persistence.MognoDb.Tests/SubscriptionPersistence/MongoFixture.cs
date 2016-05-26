@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Persistence.MongoDB.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
@@ -24,23 +25,16 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
             _storage = new SubscriptionPersister(_database);
+
+            ((IInitializableSubscriptionStorage)_storage).Init();
         }
 
-        protected SubscriptionPersister Storage
-        {
-            get { return _storage; }
-        }
+        protected SubscriptionPersister Storage => _storage;
 
-        protected IMongoCollection<Subscription> Subscriptions
-        {
-            get { return _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
-        }
+        protected IMongoCollection<Subscription> Subscriptions => _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 
     public static class Extentions

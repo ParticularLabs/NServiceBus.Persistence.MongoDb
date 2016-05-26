@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -10,31 +11,37 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
     public class AcceptanceTests : MongoFixture
     {
         [Test]
-        public void Should_handle_be_able_to_read_stored_values()
+        public async Task Should_handle_be_able_to_read_stored_values()
         {
             const string content = "Test";
 
-            var key = Put(content, TimeSpan.MaxValue);
-            using (var stream = GridFsDataBus.Get(key))
+            var key = await Put(content, TimeSpan.MaxValue);
+            using (var stream = await GridFsDataBus.Get(key))
             {
                 Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
             }
         }
 
         [Test]
-        public void Should_handle_be_able_to_read_stored_values_concurrently()
+        public async Task Should_handle_be_able_to_read_stored_values_concurrently()
         {
             const string content = "Test";
 
-            var key = Put(content, TimeSpan.MaxValue);
+            var key = await Put(content, TimeSpan.MaxValue);
 
-            Parallel.For(0, 10, i =>
+
+            var tasks = Enumerable.Range(0, 10).Select(i =>
             {
-                using (var stream = GridFsDataBus.Get(key))
+                return Task.Run(async () =>
                 {
-                    Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
-                }
+                    using(var stream = await GridFsDataBus.Get(key))
+                    {
+                        Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
+                    }
+                });
             });
+
+            await Task.WhenAll(tasks);
         }
 
         [Test]
@@ -51,7 +58,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         {
             //dataBus.MaxMessageTimeToLive = TimeSpan.FromDays(1);
 
-            Put("Test", TimeSpan.MaxValue);
+            //Put("Test", TimeSpan.MaxValue).Wait();
             //Assert.True(Directory.Exists(Path.Combine(basePath, DateTime.Now.AddDays(1).ToString("yyyy-MM-dd_HH"))));
         }
     }

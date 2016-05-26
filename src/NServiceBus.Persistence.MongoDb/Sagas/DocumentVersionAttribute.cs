@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using NServiceBus.Saga;
 
 namespace NServiceBus.Persistence.MongoDB
 {
@@ -15,6 +14,22 @@ namespace NServiceBus.Persistence.MongoDB
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]
     public class DocumentVersionAttribute :Attribute
     {
+        public static void SetPropertyValue(object objectWithADocumentVersionDecoratedProperty, int value)
+        {
+            GetDocumentVersionProperty(objectWithADocumentVersionDecoratedProperty.GetType()).SetValue(objectWithADocumentVersionDecoratedProperty, value);
+        }
+
+        public static KeyValuePair<string, int> GetProperty(object objectWithADocumentVersionDecoratedProperty)
+        {
+            var prop = GetDocumentVersionProperty(objectWithADocumentVersionDecoratedProperty.GetType());
+            return new KeyValuePair<string, int>(prop.Name, (int)prop.GetValue(objectWithADocumentVersionDecoratedProperty));
+        }
+
+        public static int GetPropertyValue(object objectWithADocumentVersionDecoratedProperty)
+        {
+            return (int)GetDocumentVersionProperty(objectWithADocumentVersionDecoratedProperty.GetType()).GetValue(objectWithADocumentVersionDecoratedProperty);
+        }
+
         /// <summary>
         /// Gets a single property that is marked with the <see cref="DocumentVersionAttribute"/> for a <see cref="IContainSagaData"/>.
         /// </summary>

@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 using NServiceBus.Config;
 using NServiceBus.Logging;
 using NServiceBus.Persistence.MongoDB;
-using NServiceBus.Saga;
 
 namespace NServiceBus.Persistence.MongoDb.Example
 {
-    public class TestStartup : IWantToRunWhenConfigurationIsComplete
+    public class TestStartup : IWantToRunWhenEndpointStartsAndStops
     {
         static ILog Logger = LogManager.GetLogger<TestStartup>();
-
-        public IBus Bus { get; set; }
-        public void Run(Configure config)
+        
+        public Task Start(IMessageSession session)
         {
-            Task.Run(() =>
+            Task.Run(async () => 
             {
                 while (true)
                 {
@@ -26,7 +24,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
                     int id = 0;
                     if (Int32.TryParse(Console.ReadLine(), out id))
                     {
-                        Bus.SendLocal<TestMessage>(message =>
+                        await session.SendLocal<TestMessage>(message =>
                         {
                             message.UserId = id; //console input
                             message.Message = Guid.NewGuid().ToString(); //random text
@@ -41,6 +39,14 @@ namespace NServiceBus.Persistence.MongoDb.Example
                     }
                 }
             });
+
+            return Task.FromResult(0);
+        }
+        
+
+        public Task Stop(IMessageSession session)
+        {
+            return Task.FromResult(0);
         }
     }
     public class TestMessage : IMessage
@@ -59,22 +65,14 @@ namespace NServiceBus.Persistence.MongoDb.Example
             mapper.ConfigureMapping<TestMessage>(m => m.UserId).ToSaga(m => m.UserId);
         }
 
-        public void Handle(TestMessage message)
+        public async Task Handle(TestMessage message, IMessageHandlerContext context)
         {
-            if (Data.UserId != message.UserId)
-            {
-                Logger.InfoFormat("[{0}] \tNew saga instance", message.UserId);
-            }
-            else
-            {
-                Logger.InfoFormat("[{0}] \tExisting saga retrieved.  Current version: {1}", message.UserId, Data.Version);
-            }
-
-            Data.UserId = message.UserId;
+            Logger.InfoFormat($"[{message.UserId}] TestSaga TestMessage recieved.  Current version: {Data.Version}");
+            
             Data.Message = $"{Data.Version} - {message.Message}";
             Console.WriteLine(message.DataBusData.Value.Length);
-
-            RequestTimeout<TestSagaTimeout>(TimeSpan.FromSeconds(10));
+            
+            await RequestTimeout<TestSagaTimeout>(context, TimeSpan.FromSeconds(10));
 
             if (Data.Version == 10)
             {
@@ -82,9 +80,10 @@ namespace NServiceBus.Persistence.MongoDb.Example
             }
         }
 
-        public void Timeout(TestSagaTimeout state)
+        public Task Timeout(TestSagaTimeout state, IMessageHandlerContext context)
         {
             Logger.InfoFormat("[{0}] \tSaga instance timeout fired", Data.UserId);
+            return Task.FromResult(0);
         }
     }
 
@@ -95,7 +94,6 @@ namespace NServiceBus.Persistence.MongoDb.Example
 
     public class TestSagaData : IContainSagaData
     {
-        [Unique]
         public virtual int UserId { get; set; }
 
         [DocumentVersion]

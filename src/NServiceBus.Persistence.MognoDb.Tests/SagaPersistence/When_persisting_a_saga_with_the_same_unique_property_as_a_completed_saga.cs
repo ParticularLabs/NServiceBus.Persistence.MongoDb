@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
@@ -6,7 +7,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
     public class When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga : MongoFixture
     {
         [Test]
-        public void It_should_persist_successfully()
+        public async Task It_should_persist_successfully()
         {
             var saga1 = new SagaWithUniqueProperty
             {
@@ -20,9 +21,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 UniqueString = "whatever"
             };
 
-            SaveSaga(saga1);
-            CompleteSaga<SagaWithUniqueProperty>(saga1.Id);
-            SaveSaga(saga2);
+            await SaveSaga(saga1);
+            await CompleteSaga<SagaWithUniqueProperty>(saga1.Id);
+            await SaveSaga(saga2);
         }
     }
 }

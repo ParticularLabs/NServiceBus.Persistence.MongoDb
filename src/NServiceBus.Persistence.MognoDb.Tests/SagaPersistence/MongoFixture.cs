@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Configuration;
 using System.Globalization;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Sagas;
-using NServiceBus.Saga;
+using NServiceBus.Sagas;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
@@ -17,7 +18,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
-        private string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
         [SetUp]
         public virtual void SetupContext()
@@ -37,40 +38,41 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _sagaPersister = new SagaPersister(_repo);
         }
 
-        protected ISagaPersister SagaPersister
-        {
-            get { return _sagaPersister; }
-        }
+        protected ISagaPersister SagaPersister => _sagaPersister;
 
         [TearDown]
-        public void TeardownContext()
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
+
+        protected Task SaveSaga<T>(T saga) where T : IContainSagaData
         {
-            _client.DropDatabase(_databaseName);
+            SagaCorrelationProperty correlationProperty = null;
+
+            if(saga.GetType() == typeof(SagaWithUniqueProperty))
+            {
+                correlationProperty = new SagaCorrelationProperty("UniqueString", String.Empty);
+            }
+
+            return _sagaPersister.Save(saga, correlationProperty, null, null );
         }
 
-        protected void SaveSaga<T>(T saga) where T : IContainSagaData
+        protected Task<T> LoadSaga<T>(Guid id) where T : IContainSagaData
         {
-            _sagaPersister.Save(saga);
+            return _sagaPersister.Get<T>(id, null, null);
         }
 
-        protected T LoadSaga<T>(Guid id) where T : IContainSagaData
+        protected async Task CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
         {
-            return _sagaPersister.Get<T>(id);
-        }
-
-        protected void CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
-        {
-            var saga = _sagaPersister.Get<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId);
             Assert.NotNull(saga);
-            _sagaPersister.Complete(saga);
+            await _sagaPersister.Complete(saga, null, null);
         }
 
-        protected void UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
+        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
         {
-            var saga = _sagaPersister.Get<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            _sagaPersister.Update(saga);
+            await _sagaPersister.Update(saga, null, null);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData

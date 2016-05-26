@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
+using NServiceBus.Extensibility;
 using NServiceBus.Persistence.MongoDB.Database;
-using NServiceBus.Saga;
+using NServiceBus.Sagas;
 
 namespace NServiceBus.Persistence.MongoDB.Sagas
 {
@@ -15,65 +17,54 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             _repo = repo;
         }
 
-        public void Save(IContainSagaData saga)
+        public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
-            SetInitialVersion(saga);
-            EnsureUniqueIndex(saga);
+            DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
+            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name).ConfigureAwait(false);
 
-            _repo.Insert(saga);
+            await _repo.Insert(sagaData).ConfigureAwait(false);
         }
 
-        private void EnsureUniqueIndex(IContainSagaData saga)
+        private async Task EnsureUniqueIndex(Type sagaDataType, string propertyName)
         {
-            var sagaDataType = saga.GetType();
-            var uniqueProperty = UniqueAttribute.GetUniqueProperty(sagaDataType);
-
-            if (uniqueProperty == null)
+            if (propertyName == null)
             {
                 return;
             }
-
+            
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var uniqueFieldName = GetFieldName(classmap, uniqueProperty.Name);
+            var uniqueFieldName = GetFieldName(classmap, propertyName);
 
-            _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName);
+            await _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName).ConfigureAwait(false);
         }
 
-        private static void SetInitialVersion(IContainSagaData saga)
+        public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            var versionProperty = DocumentVersionAttribute.GetDocumentVersionProperty(saga.GetType());
-            versionProperty.SetValue(saga, 0);
+            var versionProperty = DocumentVersionAttribute.GetProperty(sagaData);
+
+            var classmap = BsonClassMap.LookupClassMap(sagaData.GetType());
+            var versionFieldName = GetFieldName(classmap, versionProperty.Key);
+
+            return _repo.Update(sagaData, versionFieldName, versionProperty.Value);
         }
 
-        public void Update(IContainSagaData saga)
+        public Task<TSagaData> Get<TSagaData>(Guid sagaId, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
         {
-            var sagaDataType = saga.GetType();
-            var versionProperty = DocumentVersionAttribute.GetDocumentVersionProperty(sagaDataType);
-            var version = (int)versionProperty.GetValue(saga);
-
-            var classmap = BsonClassMap.LookupClassMap(sagaDataType);
-            var versionFieldName = GetFieldName(classmap, versionProperty.Name);
-
-            _repo.Update(saga, versionFieldName, version);
+            return _repo.FindById<TSagaData>(sagaId);
         }
 
-        public T Get<T>(Guid sagaId) where T : IContainSagaData
+        public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
         {
-            return _repo.FindById<T>(sagaId);
-        }
+            var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
+            var propertyFieldName = GetFieldName(classmap, propertyName);
 
-        public T Get<T>(string property, object value) where T : IContainSagaData
-        {
-            var classmap = BsonClassMap.LookupClassMap(typeof(T));
-            var propertyFieldName = GetFieldName(classmap, property);
-
-            var result = _repo.FindByFieldName<T>(propertyFieldName, value);
+            var result = await _repo.FindByFieldName<TSagaData>(propertyFieldName, propertyValue).ConfigureAwait(false);
             return result;
         }
 
-        public void Complete(IContainSagaData saga)
+        public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
         {
-            _repo.Remove(saga);
+            return _repo.Remove(sagaData);
         }
 
         private string GetFieldName(BsonClassMap classMap, string property)

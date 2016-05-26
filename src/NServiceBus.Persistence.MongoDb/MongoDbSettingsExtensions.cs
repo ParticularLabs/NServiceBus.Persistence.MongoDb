@@ -10,15 +10,15 @@ namespace NServiceBus.Persistence.MongoDB
 {
     public static class MongoDbSettingsExtensions
     {
-        public static PersistenceExtentions<MongoDbPersistence> SetConnectionStringName(
-            this PersistenceExtentions<MongoDbPersistence> cfg, string connectionStringName)
+        public static PersistenceExtensions<MongoDbPersistence> SetConnectionStringName(
+            this PersistenceExtensions<MongoDbPersistence> cfg, string connectionStringName)
         {
             cfg.GetSettings().Set(MongoPersistenceSettings.ConnectionStringName, connectionStringName);
             return cfg;
         }
 
-        public static PersistenceExtentions<MongoDbPersistence> SetConnectionString(
-            this PersistenceExtentions<MongoDbPersistence> cfg, string connectionString)
+        public static PersistenceExtensions<MongoDbPersistence> SetConnectionString(
+            this PersistenceExtensions<MongoDbPersistence> cfg, string connectionString)
         {
             cfg.GetSettings().Set(MongoPersistenceSettings.ConnectionString, connectionString);
             return cfg;

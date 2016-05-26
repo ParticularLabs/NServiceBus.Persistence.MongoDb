@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.DataBus;
 using NUnit.Framework;
@@ -29,24 +30,18 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             _gridFsDataBus = new GridFsDataBus(_database);
         }
 
-        protected GridFsDataBus GridFsDataBus
-        {
-            get { return _gridFsDataBus; }
-        }
+        protected GridFsDataBus GridFsDataBus => _gridFsDataBus;
 
-        protected string Put(string content, TimeSpan timeToLive)
+        protected async Task<string> Put(string content, TimeSpan timeToLive)
         {
             var byteArray = Encoding.ASCII.GetBytes(content);
             using (var stream = new MemoryStream(byteArray))
             {
-                return GridFsDataBus.Put(stream, timeToLive);
+                return await GridFsDataBus.Put(stream, timeToLive);
             }
         }
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 }

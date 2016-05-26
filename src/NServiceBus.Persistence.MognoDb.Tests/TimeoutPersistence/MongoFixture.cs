@@ -22,24 +22,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
 
-            _storage = new TimeoutPersister(_database)
-            {
-                EndpointName = "MyTestEndpoint",
-            };
-
-            ((IWantToRunWhenBusStartsAndStops)_storage).Start();
+            _storage = new TimeoutPersister("MyTestEndpoint", _database);
         }
 
-        protected TimeoutPersister Storage
-        {
-            get { return _storage; }
-        }
+        protected TimeoutPersister Storage => _storage;
 
         [TearDown]
-        public void TeardownContext()
-        {
-            ((IWantToRunWhenBusStartsAndStops)_storage).Stop();
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 }

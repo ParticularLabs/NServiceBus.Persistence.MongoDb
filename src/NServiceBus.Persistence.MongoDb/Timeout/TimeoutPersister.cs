@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Options;
 using MongoDB.Driver;
+using NServiceBus.Extensibility;
 using NServiceBus.Timeout.Core;
 
 namespace NServiceBus.Persistence.MongoDB.Timeout
 {
-    public class TimeoutPersister : IPersistTimeouts, IPersistTimeoutsV2, IWantToRunWhenBusStartsAndStops
+    public class TimeoutPersister : IPersistTimeouts, IQueryTimeouts
     {
         private readonly IMongoCollection<TimeoutEntity> _collection;
         
@@ -21,14 +23,9 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         }
 
 
-        void IWantToRunWhenBusStartsAndStops.Start()
+        void Start()
         {
             _collection.Indexes.CreateOne(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId));
-        }
-
-        void IWantToRunWhenBusStartsAndStops.Stop()
-        {
-
         }
 
         public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
@@ -146,6 +143,31 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             var timeoutEntity = _collection.AsQueryable().SingleOrDefault(e => e.Id == timeoutId);
             return timeoutEntity?.ToTimeoutData();
+        }
+
+        public Task Add(TimeoutData timeout, ContextBag context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> TryRemove(string timeoutId, ContextBag context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TimeoutData> Peek(string timeoutId, ContextBag context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveTimeoutBy(Guid sagaId, ContextBag context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
+        {
+            throw new NotImplementedException();
         }
     }
     

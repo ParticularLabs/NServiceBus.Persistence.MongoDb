@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -30,10 +31,10 @@ namespace NServiceBus.Persistence.MongoDB.Database
             return Database.GetCollection<BsonDocument>(GetCollectionName(type)).WithReadPreference(ReadPreference.Primary).WithWriteConcern(WriteConcern.WMajority);
         }
 
-        public void EnsureUniqueIndex(Type entityType, string fieldName)
+        public async Task EnsureUniqueIndex(Type entityType, string fieldName)
         {
-            GetCollection(entityType).Indexes.CreateOne(
-                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(fieldName, 1)), new CreateIndexOptions() { Unique = true});
+            await GetCollection(entityType).Indexes.CreateOneAsync(
+                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(fieldName, 1)), new CreateIndexOptions() { Unique = true}).ConfigureAwait(false);
         }
 
         protected static T Deserialize<T>(BsonDocument doc)

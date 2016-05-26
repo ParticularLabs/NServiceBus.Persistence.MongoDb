@@ -5,7 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Sagas;
-using NServiceBus.Saga;
+using NServiceBus.Sagas;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence

@@ -14,21 +14,27 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
     public class TimeoutPersister : IPersistTimeouts, IQueryTimeouts
     {
         private readonly IMongoCollection<TimeoutEntity> _collection;
-        
+        private static bool _indexCreated = false;
+
         public string EndpointName { get; set; }
 
-        public TimeoutPersister(IMongoDatabase database)
+        public TimeoutPersister(string endpointName, IMongoDatabase database)
         {
             _collection = database.GetCollection<TimeoutEntity>("timeouts");
         }
 
 
-        void Start()
+        private async Task EnsureIndex()
         {
-            _collection.Indexes.CreateOne(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId));
+            if (!_indexCreated)
+            {
+                //no locking - if it runs more than once it's okay - performance is higher priority
+                _indexCreated = true;
+                await _collection.Indexes.CreateOneAsync(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId)).ConfigureAwait(false);
+            }
         }
 
-        public IEnumerable<Tuple<string, DateTime>> GetNextChunk(DateTime startSlice, out DateTime nextTimeToRunQuery)
+        public async Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
         {
             var now = DateTime.UtcNow;
 
@@ -38,13 +44,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                          rBuilder.Lte(t => t.Time, now);
 
 
-            var results = _collection
+            var results = await _collection
                 .Find(rQuery)
                 .Sort(Builders<TimeoutEntity>.Sort.Ascending(t => t.Time))
                 .Project(t => new { t.Id, t.Time })
-                .ToList()
-                .Select(t => Tuple.Create(t.Id.ToString(), t.Time))
-                .ToList();
+                .ToListAsync()
+                .ConfigureAwait(false);
+                
 
             var ncBuilder = Builders<TimeoutEntity>.Filter;
             var ncQuery = ncBuilder.Eq(t => t.Endpoint, EndpointName) &
@@ -59,20 +65,17 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
             var startOfNextChunk = startOfNextChunkQry.SingleOrDefault();
 
-            if (startOfNextChunk != null)
-            {
-                nextTimeToRunQuery = startOfNextChunk.Time;
-            }
-            else
-            {
-                nextTimeToRunQuery = DateTime.UtcNow.AddMinutes(10);
-            }
+            var nextTimeToRunQuery = startOfNextChunk?.Time ?? DateTime.UtcNow.AddMinutes(10);
 
-            return results;
+            return new TimeoutsChunk(
+                results.Select(x => new TimeoutsChunk.Timeout(x.Id, x.Time)).ToList(), 
+                nextTimeToRunQuery);
         }
 
-        public void Add(TimeoutData timeout)
+        public async Task Add(TimeoutData timeout, ContextBag context)
         {
+            await EnsureIndex().ConfigureAwait(false);
+
             var timeoutId = Guid.Empty;
 
             string messageId;
@@ -86,7 +89,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 timeoutId = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow);
             }
 
-            _collection.InsertOne(new TimeoutEntity
+            await _collection.InsertOneAsync(new TimeoutEntity
             {
                 Id = timeoutId.ToString(),
                 Destination = timeout.Destination,
@@ -96,78 +99,33 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 Headers = timeout.Headers,
                 Endpoint = timeout.OwningTimeoutManager,
                 OwningTimeoutManager = timeout.OwningTimeoutManager
-            });
+            }).ConfigureAwait(false);
         }
 
-        public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
+        //public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
+        public async Task<bool> TryRemove(string timeoutId, ContextBag context)
         {
             var query =  Builders<TimeoutEntity>.Filter.Eq(t => t.Id, timeoutId);
             var entity = _collection.Find(query).FirstOrDefault();
 
             if (entity == null)
             {
-                timeoutData = null;
                 return false;
             }
 
-            timeoutData = new TimeoutData
-            {
-                Destination = entity.Destination,
-                Id = entity.Id,
-                SagaId = entity.SagaId,
-                State = entity.State,
-                Time = entity.Time,
-                Headers = entity.Headers,
-            };
-
-            if (_collection.DeleteOne(query).DeletedCount == 0)
-            {
-                timeoutData = null;
-                return false;
-            }
-
-            return true;
-        }
-
-        public void RemoveTimeoutBy(Guid sagaId)
-        {
-            _collection.DeleteMany(t => t.SagaId == sagaId);
-        }
-        
-        public bool TryRemove(string timeoutId)
-        {
-            TimeoutData timeoutData;
-            return TryRemove(timeoutId, out timeoutData);
-        }
-        public TimeoutData Peek(string timeoutId)
-        {
-            var timeoutEntity = _collection.AsQueryable().SingleOrDefault(e => e.Id == timeoutId);
-            return timeoutEntity?.ToTimeoutData();
-        }
-
-        public Task Add(TimeoutData timeout, ContextBag context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> TryRemove(string timeoutId, ContextBag context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TimeoutData> Peek(string timeoutId, ContextBag context)
-        {
-            throw new NotImplementedException();
+            return (await _collection.DeleteOneAsync(query).ConfigureAwait(false)).DeletedCount != 0;
         }
 
         public Task RemoveTimeoutBy(Guid sagaId, ContextBag context)
         {
-            throw new NotImplementedException();
+            return _collection.DeleteManyAsync(t => t.SagaId == sagaId);
         }
-
-        public Task<TimeoutsChunk> GetNextChunk(DateTime startSlice)
+        
+        public async Task<TimeoutData> Peek(string timeoutId, ContextBag context)
         {
-            throw new NotImplementedException();
+            var timeoutEntity = await _collection.Find(t => t.Id == timeoutId).FirstOrDefaultAsync().ConfigureAwait(false);
+
+            return timeoutEntity?.ToTimeoutData();
         }
     }
     
@@ -181,10 +139,11 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         /// </summary>
         public virtual string Id { get; set; }
 
+        //TODO: Breaking change NSB v5 to v6 - was type NServiceBus.Address
         /// <summary>
         /// The address of the client who requested the timeout.
         /// </summary>
-        public virtual Address Destination { get; set; }
+        public virtual string Destination { get; set; }
 
         /// <summary>
         /// The saga ID.

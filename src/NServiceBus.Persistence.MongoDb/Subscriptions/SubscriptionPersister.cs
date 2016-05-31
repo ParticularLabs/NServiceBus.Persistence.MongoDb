@@ -21,28 +21,28 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
         public SubscriptionPersister(IMongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
-
-            Init();
         }
         
-        public void Init()
+        private async Task EnsureIndex()
         {
             if (!_indexCreated)
             {
-                //no locking - if it runs more than once it's okay
+                //no locking - if it runs more than once it's okay - performance is higher priority
                 _indexCreated = true;
-                _subscriptions.Indexes.CreateOne(
-                    new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers));
+                await _subscriptions.Indexes.CreateOneAsync(
+                    new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers)).ConfigureAwait(false);
             }
         }
 
         public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
+            await EnsureIndex().ConfigureAwait(false);
+
             var key = GetMessageTypeKey(messageType);
             
             var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, SubscriberToString(subscriber));
 
-            await _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() {IsUpsert = true});
+            await _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() { IsUpsert = true }).ConfigureAwait(false);
         }
 
         private IEnumerable<SubscriptionKey> GetMessageTypeKeys(IEnumerable<MessageType> messageTypes)
@@ -55,22 +55,22 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
             return new SubscriptionKey {TypeName = messageType.TypeName, Version = messageType.Version.Major.ToString()};
         }
 
-        public async Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var key = GetMessageTypeKey(messageType);
             
             var subscriberName = SubscriberToString(subscriber);
 
             var update = new UpdateDefinitionBuilder<Subscription>().Pull(s => s.Subscribers, subscriberName);
-                
-            await _subscriptions.UpdateOneAsync(s => s.Id == key && s.Subscribers.Contains(subscriberName), update, new UpdateOptions() {IsUpsert = false});
+
+            return _subscriptions.UpdateOneAsync(s => s.Id == key && s.Subscribers.Contains(subscriberName), update, new UpdateOptions() { IsUpsert = false });
         }
 
         public async Task<IEnumerable<Subscriber>> GetSubscriberAddressesForMessage(IEnumerable<MessageType> messageTypes, ContextBag context)
         {
             var keys = GetMessageTypeKeys(messageTypes);
 
-            var subscriptions = await _subscriptions.Find(s => keys.Contains(s.Id)).ToListAsync();
+            var subscriptions = await _subscriptions.Find(s => keys.Contains(s.Id)).ToListAsync().ConfigureAwait(false);
             
             return subscriptions
                 .SelectMany(s => s.Subscribers)

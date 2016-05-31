@@ -31,10 +31,10 @@ namespace NServiceBus.Persistence.MongoDB.Database
             return Database.GetCollection<BsonDocument>(GetCollectionName(type)).WithReadPreference(ReadPreference.Primary).WithWriteConcern(WriteConcern.WMajority);
         }
 
-        public async Task EnsureUniqueIndex(Type entityType, string fieldName)
+        public Task EnsureUniqueIndex(Type entityType, string fieldName)
         {
-            await GetCollection(entityType).Indexes.CreateOneAsync(
-                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(fieldName, 1)), new CreateIndexOptions() { Unique = true}).ConfigureAwait(false);
+            return GetCollection(entityType).Indexes.CreateOneAsync(
+                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(fieldName, 1)), new CreateIndexOptions() { Unique = true });
         }
 
         protected static T Deserialize<T>(BsonDocument doc)

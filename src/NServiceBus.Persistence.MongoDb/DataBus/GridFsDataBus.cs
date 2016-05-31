@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
@@ -16,23 +17,23 @@ namespace NServiceBus.Persistence.MongoDB.DataBus
             _fs = new GridFSBucket(database);
         }
 
-        public Stream Get(string key)
+        public async Task<Stream> Get(string key)
         {
             var stream = new MemoryStream();
-            _fs.DownloadToStream(ObjectId.Parse(key), stream);
+            await _fs.DownloadToStreamAsync(ObjectId.Parse(key), stream).ConfigureAwait(false);
             stream.Position = 0;
             return stream;
         }
 
-        public string Put(Stream stream, TimeSpan timeToBeReceived)
+        public async Task<string> Put(Stream stream, TimeSpan timeToBeReceived)
         {
-            var key = _fs.UploadFromStream(Guid.NewGuid().ToString(), stream);
+            var key = await _fs.UploadFromStreamAsync(Guid.NewGuid().ToString(), stream).ConfigureAwait(false);
             return key.ToString();
         }
-
-        public void Start()
+        
+        Task IDataBus.Start()
         {
-            
+            return Task.FromResult(0);
         }
     }
 }

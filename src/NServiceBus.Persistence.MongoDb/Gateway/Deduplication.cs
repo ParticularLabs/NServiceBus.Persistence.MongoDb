@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using NServiceBus.Extensibility;
 using NServiceBus.Gateway.Deduplication;
 using NServiceBus.Persistence.MongoDB.Database;
 
@@ -21,15 +22,15 @@ namespace NServiceBus.Persistence.MongoDB.Gateway
             _collection = _database.GetCollection<GatewayMessage>(MongoPersistenceConstants.DeduplicationCollectionName);
         }
 
-        public bool DeduplicateMessage(string clientId, DateTime timeReceived)
+        public async Task<bool> DeduplicateMessage(string clientId, DateTime timeReceived, ContextBag context)
         {
             try
             {
-                _collection.WithWriteConcern(WriteConcern.W1).WithReadPreference(ReadPreference.Primary).InsertOne(new GatewayMessage()
+                await _collection.WithWriteConcern(WriteConcern.W1).WithReadPreference(ReadPreference.Primary).InsertOneAsync(new GatewayMessage()
                 {
                     Id = clientId,
                     TimeReceived = timeReceived
-                });
+                }).ConfigureAwait(false);
                 
                 return true;
             }

@@ -16,9 +16,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             entity = new TestSaga { Id = Guid.NewGuid() };
             entity.Status = StatusEnum.AnotherStatus;
 
-            SagaPersister.Save(entity);
+            SaveSaga(entity).Wait();
 
-            savedEntity = SagaPersister.Get<TestSaga>(entity.Id);
+            savedEntity = LoadSaga<TestSaga>(entity.Id);
         }
 
         [Test]

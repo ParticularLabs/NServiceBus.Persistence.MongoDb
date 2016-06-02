@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
@@ -16,9 +17,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             entity = new TestSaga { Id = Guid.NewGuid() };
             entity.TestComponent = new TestComponent { Property = "Prop" };
 
-            SagaPersister.Save(entity);
+            Task.WaitAll(SaveSaga(entity));
 
-            savedEntity = SagaPersister.Get<TestSaga>(entity.Id);
+            savedEntity = LoadSaga<TestSaga>(entity.Id);
         }
 
         [Test]

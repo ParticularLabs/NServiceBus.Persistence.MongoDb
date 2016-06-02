@@ -16,9 +16,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             entity = new TestSaga { Id = Guid.NewGuid() };
             entity.DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime();
 
-            SagaPersister.Save(entity);
+            SaveSaga(entity).Wait();
 
-            savedEntity = SagaPersister.Get<TestSaga>(entity.Id);
+            savedEntity = LoadSaga<TestSaga>(entity.Id);
         }
 
         [Test]

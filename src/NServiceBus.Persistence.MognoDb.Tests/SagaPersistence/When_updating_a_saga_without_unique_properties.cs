@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using NServiceBus.Persistence.MongoDB.Sagas;
 using NUnit.Framework;
 
@@ -7,7 +8,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
     public class When_updating_a_saga_without_unique_properties : MongoFixture
     {
         [Test]
-        public void It_should_persist_successfully()
+        public async Task It_should_persist_successfully()
         {
             var saga1 = new SagaWithoutUniqueProperties()
             {
@@ -18,7 +19,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             SaveSaga(saga1);
             
-            UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+            await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
             {
                 s.NonUniqueString = "notUnique2";
                 s.UniqueString = "whatever2";
@@ -30,7 +31,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
 
         [Test]
-        public void It_should_throw_when_version_changed()
+        public async Task It_should_throw_when_version_changed()
         {
             var saga1 = new SagaWithoutUniqueProperties()
             {
@@ -39,11 +40,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 NonUniqueString = "notUnique"
             };
 
-            SaveSaga(saga1);
+            await SaveSaga(saga1);
 
-            Assert.Throws<SagaMongoDbConcurrentUpdateException>(() =>
+            var correctExceptionThrown = false;
+            try
             {
-                UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+                await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
                 {
                     Assert.AreEqual(s.Version, 0);
                     s.NonUniqueString = "notUnique2";
@@ -51,7 +53,13 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
                     ChangeSagaVersionManually<SagaWithoutUniqueProperties>(s.Id, 1);
                 });
-            });
+            }
+            catch (SagaMongoDbConcurrentUpdateException)
+            {
+                correctExceptionThrown = true;
+            }
+
+            Assert.IsTrue(correctExceptionThrown, "Should have thrown a SagaMongoDbConcurrentUpdateException exception");
         }
     }
 }

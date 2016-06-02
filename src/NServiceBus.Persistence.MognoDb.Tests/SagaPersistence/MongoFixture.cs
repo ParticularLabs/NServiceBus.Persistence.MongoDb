@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Globalization;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
@@ -48,29 +49,36 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _client.DropDatabase(_databaseName);
         }
 
-        protected void SaveSaga<T>(T saga) where T : IContainSagaData
+        protected Task SaveSaga<T>(T saga) where T : IContainSagaData
         {
-            _sagaPersister.Save(saga);
+            SagaCorrelationProperty correlationProperty = null;
+
+            if(saga.GetType() == typeof(SagaWithUniqueProperty))
+            {
+                correlationProperty = new SagaCorrelationProperty("UniqueString", String.Empty);
+            }
+
+            return _sagaPersister.Save(saga, correlationProperty, null, null );
         }
 
         protected T LoadSaga<T>(Guid id) where T : IContainSagaData
         {
-            return _sagaPersister.Get<T>(id);
+            return _sagaPersister.Get<T>(id, null, null).Result;
         }
 
         protected void CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
         {
-            var saga = _sagaPersister.Get<T>(sagaId);
+            var saga = LoadSaga<T>(sagaId);
             Assert.NotNull(saga);
-            _sagaPersister.Complete(saga);
+            _sagaPersister.Complete(saga, null, null);
         }
 
-        protected void UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
+        protected Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
         {
-            var saga = _sagaPersister.Get<T>(sagaId);
+            var saga = LoadSaga<T>(sagaId);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            _sagaPersister.Update(saga);
+            return _sagaPersister.Update(saga, null, null);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData

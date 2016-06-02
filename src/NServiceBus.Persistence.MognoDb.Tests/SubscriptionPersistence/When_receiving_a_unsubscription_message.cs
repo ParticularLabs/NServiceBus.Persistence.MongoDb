@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using NServiceBus.Persistence.MongoDB.Subscriptions;
@@ -12,11 +13,13 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
     public class When_receiving_a_unsubscription_message : MongoFixture
     {
         [Test]
-        public void All_subscription_entries_for_specfied_message_types_should_be_removed()
+        public async Task All_subscription_entries_for_specfied_message_types_should_be_removed()
         {
-            Storage.Subscribe(TestClients.ClientA, MessageTypes.All);
+            foreach(var messageType in MessageTypes.All)
+                await Storage.Subscribe(TestClients.ClientA, messageType, null);
 
-            Storage.Unsubscribe(TestClients.ClientA, MessageTypes.All);
+            foreach (var messageType in MessageTypes.All)
+                await Storage.Unsubscribe(TestClients.ClientA, messageType, null);
 
             var builder = Builders<Subscription>.Filter;
             var query = builder.Ne(s => s.Subscribers, null) & !builder.Size(s => s.Subscribers, 0);

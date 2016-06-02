@@ -59,10 +59,10 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             return collection.DeleteOneAsync(new BsonDocument("_id", saga.Id));
         }
 
-        public async Task Insert(object entity)
+        public Task Insert(object entity)
         {
             var collection = GetCollection(entity.GetType());
-            await collection.InsertOneAsync(entity.ToBsonDocument()).ConfigureAwait(false);
+            return collection.InsertOneAsync(entity.ToBsonDocument());
         }
     }
 }

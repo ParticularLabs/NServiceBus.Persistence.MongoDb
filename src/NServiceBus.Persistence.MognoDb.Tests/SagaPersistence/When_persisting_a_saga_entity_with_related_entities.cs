@@ -18,9 +18,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             entity.RelatedClass = new RelatedClass { Id = Guid.NewGuid() };
             relatedClass = entity.RelatedClass;
 
-            SagaPersister.Save(entity);
+            SaveSaga(entity).Wait();
 
-            savedEntity = SagaPersister.Get<TestSaga>(entity.Id);
+            savedEntity = LoadSaga<TestSaga>(entity.Id);
         }
 
         [Test]

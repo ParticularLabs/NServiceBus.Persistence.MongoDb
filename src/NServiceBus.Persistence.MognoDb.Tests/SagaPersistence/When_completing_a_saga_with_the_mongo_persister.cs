@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
@@ -7,14 +8,14 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
     {
 
         [Test]
-        public void Should_delete_the_saga()
+        public async Task Should_delete_the_saga()
         {
             var sagaId = Guid.NewGuid();
 
-            SaveSaga(new TestSaga { Id = sagaId });
+            await SaveSaga(new TestSaga { Id = sagaId });
             CompleteSaga<TestSaga>(sagaId);
 
-            Assert.Null(SagaPersister.Get<TestSaga>(sagaId));
+            Assert.Null(LoadSaga<TestSaga>(sagaId));
         }
     }
 }

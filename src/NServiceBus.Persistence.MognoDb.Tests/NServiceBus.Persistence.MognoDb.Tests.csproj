@@ -46,7 +46,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0-beta0002\lib\net452\NServiceBus.Core.dll</HintPath>
+      <HintPath>..\packages\NServiceBus.6.0.0-beta0003\lib\net452\NServiceBus.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -75,18 +75,15 @@
     <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
     <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_inherited_property.cs" />
     <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_related_entities.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_another_saga.cs" />
     <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
-    <Compile Include="SagaPersistence\When_updating_a_saga_with_unique_properties.cs" />
     <Compile Include="SagaPersistence\When_updating_a_saga_without_unique_properties.cs" />
+    <Compile Include="SagaPersistence\When_updating_a_saga_with_unique_properties.cs" />
     <Compile Include="SubscriptionPersistence\MongoFixture.cs" />
     <Compile Include="SubscriptionPersistence\TestData.cs" />
     <Compile Include="SubscriptionPersistence\When_listing_subscribers_for_message_types.cs" />
     <Compile Include="SubscriptionPersistence\When_receiving_a_subscription_message.cs" />
     <Compile Include="SubscriptionPersistence\When_receiving_a_unsubscription_message.cs" />
     <Compile Include="SubscriptionPersistence\When_using_semantic_versioning_of_messages.cs" />
-    <Compile Include="Gateway\Should_Dedupe.cs" />
-    <Compile Include="Gateway\MongoFixture.cs" />
     <Compile Include="TimeoutPersistence\MongoFixture.cs" />
     <Compile Include="TimeoutPersistence\When_fetching_timeouts_from_storage.cs" />
   </ItemGroup>

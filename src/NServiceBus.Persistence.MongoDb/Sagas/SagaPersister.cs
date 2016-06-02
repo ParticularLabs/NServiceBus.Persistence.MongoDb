@@ -20,7 +20,7 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
         public async Task Save(IContainSagaData sagaData, SagaCorrelationProperty correlationProperty, SynchronizedStorageSession session, ContextBag context)
         {
             DocumentVersionAttribute.SetPropertyValue(sagaData, 0);
-            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty.Name).ConfigureAwait(false);
+            await EnsureUniqueIndex(sagaData.GetType(), correlationProperty?.Name).ConfigureAwait(false);
 
             await _repo.Insert(sagaData).ConfigureAwait(false);
         }

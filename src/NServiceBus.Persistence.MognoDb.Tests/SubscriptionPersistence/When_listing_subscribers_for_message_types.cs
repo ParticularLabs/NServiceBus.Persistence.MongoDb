@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using NServiceBus.Unicast.Subscriptions;
 using NUnit.Framework;
 
@@ -8,27 +9,29 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
     public class When_listing_subscribers_for_message_types : MongoFixture
     {
         [Test]
-        public void The_names_of_all_subscribers_should_be_returned()
+        public async Task The_names_of_all_subscribers_should_be_returned()
         {
-            Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA);
-            Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB);
-            Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageA);
-            Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageAv2);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB, null);
+            await Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageA, null);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageAv2, null);
 
-            var subscriptionsForMessageType = Storage.GetSubscriberAddressesForMessage(MessageTypes.MessageA);
+            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new [] { MessageTypes.MessageA }, null);
 
             Assert.AreEqual(2, subscriptionsForMessageType.Count());
-            Assert.AreEqual(TestClients.ClientA, subscriptionsForMessageType.First());
+            var firstSub = subscriptionsForMessageType.First();
+            Assert.AreEqual(TestClients.ClientA.Endpoint.ToString(), firstSub.Endpoint.ToString());
+            Assert.AreEqual(TestClients.ClientA.TransportAddress, firstSub.TransportAddress);
         }
 
         [Test]
-        public void Duplicates_should_not_be_generated_for_interface_inheritance_chains()
+        public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains()
         {
-            Storage.Subscribe(TestClients.ClientA, new[] { new MessageType(typeof(ISomeInterface)) });
-            Storage.Subscribe(TestClients.ClientA, new[] { new MessageType(typeof(ISomeInterface2)) });
-            Storage.Subscribe(TestClients.ClientA, new[] { new MessageType(typeof(ISomeInterface3)) });
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), null);
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface2)), null);
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface3)), null);
 
-            var subscriptionsForMessageType = Storage.GetSubscriberAddressesForMessage(new[] { new MessageType(typeof(ISomeInterface)), new MessageType(typeof(ISomeInterface2)), new MessageType(typeof(ISomeInterface3)) });
+            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new[] { new MessageType(typeof(ISomeInterface)), new MessageType(typeof(ISomeInterface2)), new MessageType(typeof(ISomeInterface3)) }, null);
 
             Assert.AreEqual(1, subscriptionsForMessageType.Count());
         }

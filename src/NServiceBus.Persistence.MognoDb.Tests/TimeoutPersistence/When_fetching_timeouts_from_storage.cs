@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence;
-using NServiceBus.Persistence.MongoDB.Timeout;
 using NServiceBus.Support;
 using NServiceBus.Timeout.Core;
 using NUnit.Framework;
@@ -15,62 +13,61 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
     public class When_fetching_timeouts_from_storage : MongoFixture
     {
         [Test]
-        public void Should_persist_with_common_nservicebus_headers()
+        public async Task Should_persist_with_common_nservicebus_headers()
         {
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            Storage.Add(new TimeoutData
+            await Storage.Add(new TimeoutData
             {
                 Time = nextTime,
-                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                Destination = $"timeouts@{RuntimeEnvironment.MachineName}",
                 SagaId = Guid.NewGuid(),
                 State = new byte[] { 0, 0, 133 },
                 Headers = new Dictionary<string, string> { { Headers.MessageId, Guid.NewGuid().ToString() }, { Headers.NServiceBusVersion, Guid.NewGuid().ToString() }, { Headers.OriginatingAddress, Guid.NewGuid().ToString() } },
                 OwningTimeoutManager = "MyTestEndpoint",
-            });
+            }, null);
         }
 
         [Test]
-        public void Should_return_the_complete_list_of_timeouts()
+        public async Task Should_return_the_complete_list_of_timeouts()
         {
             const int numberOfTimeoutsToAdd = 10;
 
             for (var i = 0; i < numberOfTimeoutsToAdd; i++)
             {
-                Storage.Add(new TimeoutData
+                await Storage.Add(new TimeoutData
                 {
                     Time = DateTime.UtcNow.AddHours(-1),
-                    Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                    Destination = $"timeouts@{RuntimeEnvironment.MachineName}",
                     SagaId = Guid.NewGuid(),
                     State = new byte[] { 0, 0, 133 },
                     Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                     OwningTimeoutManager = "MyTestEndpoint",
-                });
+                }, null);
             }
             
-            DateTime nextTimeToRunQuery;
-            Assert.AreEqual(numberOfTimeoutsToAdd, Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery).Count());
+            
+            Assert.AreEqual(numberOfTimeoutsToAdd, (await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
         }
 
         [Test]
-        public void Should_return_the_next_time_of_retrieval()
+        public async Task Should_return_the_next_time_of_retrieval()
         {
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            Storage.Add(new TimeoutData
+            await Storage.Add(new TimeoutData
             {
                 Time = nextTime,
-                Destination = new Address("timeouts", RuntimeEnvironment.MachineName),
+                Destination = $"timeouts@{RuntimeEnvironment.MachineName}",
                 SagaId = Guid.NewGuid(),
                 State = new byte[] { 0, 0, 133 },
                 Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                 OwningTimeoutManager = "MyTestEndpoint",
-            });
+            }, null);
 
-            DateTime nextTimeToRunQuery;
-            Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3), out nextTimeToRunQuery);
+            var result = await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3));
 
-            Assert.IsTrue((nextTime - nextTimeToRunQuery).TotalSeconds < 1);
+            Assert.IsTrue((nextTime - result.NextTimeToQuery).TotalSeconds < 1);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
         
         public Task Start(IMessageSession session)
         {
-            return Task.Run(async () => 
+            Task.Run(async () => 
             {
                 while (true)
                 {
@@ -24,7 +24,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
                     int id = 0;
                     if (Int32.TryParse(Console.ReadLine(), out id))
                     {
-                        await session.Send<TestMessage>(message =>
+                        await session.SendLocal<TestMessage>(message =>
                         {
                             message.UserId = id; //console input
                             message.Message = Guid.NewGuid().ToString(); //random text
@@ -39,6 +39,8 @@ namespace NServiceBus.Persistence.MongoDb.Example
                     }
                 }
             });
+
+            return Task.FromResult(0);
         }
         
 

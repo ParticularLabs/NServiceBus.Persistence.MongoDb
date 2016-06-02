@@ -12,37 +12,28 @@ using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 
 namespace NServiceBus.Persistence.MongoDB.Subscriptions
 {
-    public class SubscriptionPersister : ISubscriptionStorage
+    public class SubscriptionPersister : ISubscriptionStorage, IInitializableSubscriptionStorage
     {
         private readonly IMongoCollection<Subscription> _subscriptions;
-
-        private static bool _indexCreated = false;
-
+        
         public SubscriptionPersister(IMongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
         }
-        
-        private async Task EnsureIndex()
+
+        public void Init()
         {
-            if (!_indexCreated)
-            {
-                //no locking - if it runs more than once it's okay - performance is higher priority
-                _indexCreated = true;
-                await _subscriptions.Indexes.CreateOneAsync(
-                    new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers)).ConfigureAwait(false);
-            }
+            _subscriptions.Indexes.CreateOne(
+                    new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers));
         }
 
-        public async Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
+        public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
-            await EnsureIndex().ConfigureAwait(false);
-
             var key = GetMessageTypeKey(messageType);
             
             var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, SubscriberToString(subscriber));
 
-            await _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() { IsUpsert = true }).ConfigureAwait(false);
+            return _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() { IsUpsert = true });
         }
 
         private IEnumerable<SubscriptionKey> GetMessageTypeKeys(IEnumerable<MessageType> messageTypes)

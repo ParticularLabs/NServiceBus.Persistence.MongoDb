@@ -13,16 +13,16 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 {
     public class TimeoutPersister : IPersistTimeouts, IQueryTimeouts
     {
+        private readonly string _endpointName;
         private readonly IMongoCollection<TimeoutEntity> _collection;
         private static bool _indexCreated = false;
 
-        public string EndpointName { get; set; }
 
         public TimeoutPersister(string endpointName, IMongoDatabase database)
         {
+            _endpointName = endpointName;
             _collection = database.GetCollection<TimeoutEntity>("timeouts");
         }
-
 
         private async Task EnsureIndex()
         {
@@ -39,7 +39,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             var now = DateTime.UtcNow;
 
             var rBuilder = Builders<TimeoutEntity>.Filter;
-            var rQuery = rBuilder.Eq(t => t.Endpoint, EndpointName) &
+            var rQuery = rBuilder.Eq(t => t.Endpoint, _endpointName) &
                          rBuilder.Gte(t => t.Time, startSlice) &
                          rBuilder.Lte(t => t.Time, now);
 
@@ -53,7 +53,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
                 
 
             var ncBuilder = Builders<TimeoutEntity>.Filter;
-            var ncQuery = ncBuilder.Eq(t => t.Endpoint, EndpointName) &
+            var ncQuery = ncBuilder.Eq(t => t.Endpoint, _endpointName) &
                           ncBuilder.Gte(t => t.Time, now);
 
             var startOfNextChunkQry = _collection

@@ -17,7 +17,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 NonUniqueString = "notUnique"
             };
 
-            SaveSaga(saga1);
+            await SaveSaga(saga1);
             
             await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
             {
@@ -25,7 +25,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 s.UniqueString = "whatever2";
             });
 
-            saga1 = LoadSaga<SagaWithoutUniqueProperties>(saga1.Id);
+            saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id);
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 
@@ -42,24 +42,16 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             await SaveSaga(saga1);
 
-            var correctExceptionThrown = false;
-            try
-            {
-                await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
+            Assert.ThrowsAsync<SagaMongoDbConcurrentUpdateException>(() => 
+                UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
                 {
                     Assert.AreEqual(s.Version, 0);
                     s.NonUniqueString = "notUnique2";
                     s.UniqueString = "whatever2";
 
                     ChangeSagaVersionManually<SagaWithoutUniqueProperties>(s.Id, 1);
-                });
-            }
-            catch (SagaMongoDbConcurrentUpdateException)
-            {
-                correctExceptionThrown = true;
-            }
-
-            Assert.IsTrue(correctExceptionThrown, "Should have thrown a SagaMongoDbConcurrentUpdateException exception");
+                })
+            );
         }
     }
 }

@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
             await UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.NonUniqueString = "notUnique2");
 
-            saga1 = LoadSaga<SagaWithUniqueProperty>(saga1.Id);
+            saga1 = await LoadSaga<SagaWithUniqueProperty>(saga1.Id);
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 
@@ -37,24 +37,14 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             };
 
             await SaveSaga(saga);
+
+
             saga.Id = Guid.NewGuid();
-
-            try
-            {
-                await SaveSaga(saga);
-            }
-            catch (MongoWriteException writeException)
-            {
-                //var writeException = ex.GetBaseException() as MongoWriteException;
-                // Check for "E11000 duplicate key error"
-                // https://docs.mongodb.org/manual/reference/command/insert/
-
-                Assert.AreEqual(11000, writeException?.WriteError?.Code);
-                return;
-            }
-
-            Assert.Fail("Should have thrown an exception");
-
+            var writeException = Assert.ThrowsAsync<MongoWriteException>(() => SaveSaga(saga));
+            
+            // Check for "E11000 duplicate key error"
+            // https://docs.mongodb.org/manual/reference/command/insert/
+            Assert.AreEqual(11000, writeException?.WriteError?.Code);
         }
     }
 }

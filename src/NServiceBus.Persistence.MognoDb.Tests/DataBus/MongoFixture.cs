@@ -30,10 +30,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             _gridFsDataBus = new GridFsDataBus(_database);
         }
 
-        protected GridFsDataBus GridFsDataBus
-        {
-            get { return _gridFsDataBus; }
-        }
+        protected GridFsDataBus GridFsDataBus => _gridFsDataBus;
 
         protected async Task<string> Put(string content, TimeSpan timeToLive)
         {
@@ -45,9 +42,6 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         }
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 }

@@ -25,15 +25,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
             _storage = new TimeoutPersister("MyTestEndpoint", _database);
         }
 
-        protected TimeoutPersister Storage
-        {
-            get { return _storage; }
-        }
+        protected TimeoutPersister Storage => _storage;
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 }

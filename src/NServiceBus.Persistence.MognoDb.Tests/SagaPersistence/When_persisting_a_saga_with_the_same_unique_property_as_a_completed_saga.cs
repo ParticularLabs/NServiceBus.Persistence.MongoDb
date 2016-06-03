@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             };
 
             await SaveSaga(saga1);
-            CompleteSaga<SagaWithUniqueProperty>(saga1.Id);
+            await CompleteSaga<SagaWithUniqueProperty>(saga1.Id);
             await SaveSaga(saga2);
         }
     }

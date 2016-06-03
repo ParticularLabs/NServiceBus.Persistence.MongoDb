@@ -27,15 +27,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
             _deduplication = new Deduplication(_database);
         }
 
-        protected IDeduplicateMessages Deduplication
-        {
-            get { return _deduplication; }
-        }
+        protected IDeduplicateMessages Deduplication => _deduplication;
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 }

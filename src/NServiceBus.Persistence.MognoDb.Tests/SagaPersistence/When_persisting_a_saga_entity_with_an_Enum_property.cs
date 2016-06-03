@@ -1,30 +1,28 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 {
     public class When_persisting_a_saga_entity_with_an_Enum_property : MongoFixture
     {
-        protected TestSaga entity;
-        protected TestSaga savedEntity;
+        TestSaga _entity;
+        TestSaga _savedEntity;
 
         [SetUp]
-        public override void SetupContext()
+        public async Task Setup()
         {
-            base.SetupContext();
+            _entity = new TestSaga {Id = Guid.NewGuid(), Status = StatusEnum.AnotherStatus};
 
-            entity = new TestSaga { Id = Guid.NewGuid() };
-            entity.Status = StatusEnum.AnotherStatus;
+            await SaveSaga(_entity);
 
-            SaveSaga(entity).Wait();
-
-            savedEntity = LoadSaga<TestSaga>(entity.Id);
+            _savedEntity = await LoadSaga<TestSaga>(_entity.Id);
         }
 
         [Test]
         public void Enums_should_be_persisted()
         {
-            Assert.AreEqual(entity.Status, savedEntity.Status);
+            Assert.AreEqual(_entity.Status, _savedEntity.Status);
         }
     }
 }

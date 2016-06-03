@@ -26,21 +26,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             _storage = new SubscriptionPersister(_database);
         }
 
-        protected SubscriptionPersister Storage
-        {
-            get { return _storage; }
-        }
+        protected SubscriptionPersister Storage => _storage;
 
-        protected IMongoCollection<Subscription> Subscriptions
-        {
-            get { return _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName); }
-        }
+        protected IMongoCollection<Subscription> Subscriptions => _database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
     }
 
     public static class Extentions

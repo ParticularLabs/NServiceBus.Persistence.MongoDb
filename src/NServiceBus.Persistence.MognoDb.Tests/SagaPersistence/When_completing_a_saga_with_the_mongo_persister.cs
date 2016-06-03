@@ -13,9 +13,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             var sagaId = Guid.NewGuid();
 
             await SaveSaga(new TestSaga { Id = sagaId });
-            CompleteSaga<TestSaga>(sagaId);
+            await CompleteSaga<TestSaga>(sagaId);
 
-            Assert.Null(LoadSaga<TestSaga>(sagaId));
+            Assert.Null(await LoadSaga<TestSaga>(sagaId));
         }
     }
 }

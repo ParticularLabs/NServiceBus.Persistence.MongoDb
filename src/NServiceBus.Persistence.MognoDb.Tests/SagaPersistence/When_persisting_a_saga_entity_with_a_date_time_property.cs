@@ -1,30 +1,32 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 {
     public class When_persisting_a_saga_entity_with_a_DateTime_property : MongoFixture
     {
-        protected TestSaga entity;
-        protected TestSaga savedEntity;
-
+        TestSaga _entity;
+        TestSaga _savedEntity;
+        
         [SetUp]
-        public override void SetupContext()
+        public async Task Setup()
         {
-            base.SetupContext();
+            _entity = new TestSaga
+            {
+                Id = Guid.NewGuid(),
+                DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime()
+            };
 
-            entity = new TestSaga { Id = Guid.NewGuid() };
-            entity.DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime();
+            await SaveSaga(_entity);
 
-            SaveSaga(entity).Wait();
-
-            savedEntity = LoadSaga<TestSaga>(entity.Id);
+            _savedEntity = await LoadSaga<TestSaga>(_entity.Id);
         }
 
         [Test]
         public void Datetime_property_should_be_persisted()
         {
-            Assert.AreEqual(entity.DateTimeProperty, savedEntity.DateTimeProperty);
+            Assert.AreEqual(_entity.DateTimeProperty, _savedEntity.DateTimeProperty);
         }
     }
 }

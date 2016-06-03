@@ -18,21 +18,21 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
     public class Should_Dedupe : MongorFixture
     {
         [TestCase]
-        public void Returns_True_With_Unique_Id()
+        public async Task Returns_True_With_Unique_Id()
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(Deduplication.DeduplicateMessage("test", timeReceived));
-            Assert.IsTrue(Deduplication.DeduplicateMessage("test2", timeReceived));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test2", timeReceived, null));
         }
 
         [TestCase]
-        public void Returns_False_With_Duplicate_Id()
+        public async Task Returns_False_With_Duplicate_Id()
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(Deduplication.DeduplicateMessage("test", timeReceived));
-            Assert.IsFalse(Deduplication.DeduplicateMessage("test", timeReceived));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
+            Assert.IsFalse(await Deduplication.DeduplicateMessage("test", timeReceived, null));
         }
     }
 }

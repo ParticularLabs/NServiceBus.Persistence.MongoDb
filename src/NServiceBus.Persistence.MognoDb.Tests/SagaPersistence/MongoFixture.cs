@@ -18,7 +18,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         private ISagaPersister _sagaPersister;
         private MongoClient _client;
         private bool _camelCaseConventionSet;
-        private string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
+        private readonly string _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);
 
         [SetUp]
         public virtual void SetupContext()
@@ -38,16 +38,10 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _sagaPersister = new SagaPersister(_repo);
         }
 
-        protected ISagaPersister SagaPersister
-        {
-            get { return _sagaPersister; }
-        }
+        protected ISagaPersister SagaPersister => _sagaPersister;
 
         [TearDown]
-        public void TeardownContext()
-        {
-            _client.DropDatabase(_databaseName);
-        }
+        public void TeardownContext() => _client.DropDatabase(_databaseName);
 
         protected Task SaveSaga<T>(T saga) where T : IContainSagaData
         {
@@ -61,24 +55,24 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             return _sagaPersister.Save(saga, correlationProperty, null, null );
         }
 
-        protected T LoadSaga<T>(Guid id) where T : IContainSagaData
+        protected Task<T> LoadSaga<T>(Guid id) where T : IContainSagaData
         {
-            return _sagaPersister.Get<T>(id, null, null).Result;
+            return _sagaPersister.Get<T>(id, null, null);
         }
 
-        protected void CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
+        protected async Task CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
         {
-            var saga = LoadSaga<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId);
             Assert.NotNull(saga);
-            _sagaPersister.Complete(saga, null, null);
+            await _sagaPersister.Complete(saga, null, null);
         }
 
-        protected Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
+        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
         {
-            var saga = LoadSaga<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            return _sagaPersister.Update(saga, null, null);
+            await _sagaPersister.Update(saga, null, null);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData

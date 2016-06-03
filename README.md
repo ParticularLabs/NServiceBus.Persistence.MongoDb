@@ -1,19 +1,19 @@
 ## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/9cfq3u3vd0rf4kl2/branch/master?svg=true)](https://ci.appveyor.com/project/tekmaven/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
 
-This package includes MongoDB persistence implementations for NServiceBus:
+This package includes MongoDB persistence implementations for NServiceBus v6:
 
-- Timeouts 
+- Timeouts
 - Subscriptions
 - Sagas
 - DataBus
 
 ## Install ##
-Add the `NServiceBus.Persistence.MongoDb` package to your NServiceBus service host project. 
+Add the `NServiceBus.Persistence.MongoDb` package to your NServiceBus service host project.
 
  ```Install-Package NServiceBus.Persistence.MongoDb```   
 
 ## Configuration ##
-**1** Set the `BusConfiguration` object to use `MongoDbPersistence`
+**1** Set the `EndpointConfiguration` object to use `MongoDbPersistence`
 
 ```csharp
 using NServiceBus;
@@ -21,9 +21,9 @@ using NServiceBus.Persistence.MongoDB;
 
 namespace Example
 {
-    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    public class EndpointConfig : IConfigureThisEndpoint
     {
-        public void Customize(BusConfiguration configuration)
+        public void Customize(EndpointConfiguration configuration)
         {
             configuration.UsePersistence<MongoDbPersistence>();
         }
@@ -35,7 +35,7 @@ namespace Example
 
 ```xml
 <connectionStrings>
-    <add name="NServiceBus/Persistence/MongoDB" 
+    <add name="NServiceBus/Persistence/MongoDB"
 		connectionString="mongodb://localhost/databaseName"/>
 </connectionStrings>
 ```
@@ -55,7 +55,7 @@ config
 If you are resolving your configuration setting from a different source at run-time which is  
 very common in cloud based deployments. Then you can use  ```.SetConnectionString(string)```  
 to provide it.
- 
+
 ```csharp
 config
 	.UsePersistence<MongoDbPersistence>()
@@ -65,16 +65,14 @@ config
 ## Saga definition guideline##
 In order to get Sagas working correctly you need to enforce following
 
-* your saga state should implement ```IContainSagaData``` 
+* your saga state should implement ```IContainSagaData```
 * requires a property ```Version``` decorated with attribute ```[DocumentVersion]```
-* the correlation id property should be decorated with attribute ```[Unique]```
 
 Here is an example
 
 ```csharp
 public class OrderBillingSagaData : IContainSagaData
 {
-    [Unique]
     public string OrderId { get; set; }
 
     [DocumentVersion]
@@ -85,7 +83,7 @@ public class OrderBillingSagaData : IContainSagaData
     public Guid Id { get; set; }
     public string Originator { get; set; }
     public string OriginalMessageId { get; set; }
-} 
+}
 ```
 ## Dealing with concurrency ##
 The key concurrency safeguards that sagas guarantee depend heavily on the underlying data store.   
@@ -113,9 +111,9 @@ using NServiceBus.Persistence.MongoDB;
 
 namespace Example
 {
-    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    public class EndpointConfig : IConfigureThisEndpoint
     {
-        public void Customize(BusConfiguration configuration)
+        public void Customize(EndpointConfiguration configuration)
         {
             configuration.UsePersistence<MongoDbPersistence>();
             configuration.UseDataBus<MongoDbDataBus>(); //add this line!

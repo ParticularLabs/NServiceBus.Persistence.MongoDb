@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Persistence.MongoDB.Subscriptions;
+using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
@@ -24,6 +25,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
             _storage = new SubscriptionPersister(_database);
+
+            ((IInitializableSubscriptionStorage)_storage).Init();
         }
 
         protected SubscriptionPersister Storage => _storage;

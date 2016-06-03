@@ -9,14 +9,14 @@
       <projectUrl>https://github.com/tekmaven/NServiceBus.Persistence.MongoDb</projectUrl>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>MongoDB Persistence for NServiceBus.</description>
-      <copyright>Copyright 2015</copyright>
+      <copyright>Copyright 2016</copyright>
       <tags>NServiceBus MongoDb Persistence</tags>
       <dependencies>
         <dependency id="MongoDB.Bson" version="2.2.4" />
         <dependency id="MongoDB.Driver" version="2.2.4" />
         <dependency id="MongoDB.Driver.Core" version="2.2.4" />
         <dependency id="MongoDB.Driver.GridFS" version="2.2.4" />
-        <dependency id="NServiceBus" version="[5.2.14, 6.0.0)" />
+        <dependency id="NServiceBus" version="[6.0.0-beta0003, 7.0.0)" />
       </dependencies>
   </metadata>
 </package>

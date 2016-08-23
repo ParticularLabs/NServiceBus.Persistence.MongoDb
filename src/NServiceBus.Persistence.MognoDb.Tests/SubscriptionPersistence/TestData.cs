@@ -36,9 +36,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 
     public class TestClients
     {
-        public static Subscriber ClientA = new Subscriber("ClientA", new EndpointName("EndpointA"));
-        public static Subscriber ClientB = new Subscriber("ClientB", new EndpointName("EndpointB"));
-        public static Subscriber ClientC = new Subscriber("ClientC", new EndpointName("EndpointC"));
+        public static Subscriber ClientA = new Subscriber("ClientA", "EndpointA");
+        public static Subscriber ClientB = new Subscriber("ClientB", "EndpointB");
+        public static Subscriber ClientC = new Subscriber("ClientC", "EndpointC");
     }
 
 }

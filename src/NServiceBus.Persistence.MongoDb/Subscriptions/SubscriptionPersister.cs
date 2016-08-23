@@ -101,7 +101,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
                 throw new ArgumentException($"Empty endpointName part of address. Address supplied: '{address}'", nameof(address));
             }
 
-            return new Subscriber(transportAddress, new EndpointName(endpointName));
+            return new Subscriber(transportAddress, endpointName);
         }
     }
 }

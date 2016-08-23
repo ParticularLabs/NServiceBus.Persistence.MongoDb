@@ -1,15 +1,20 @@
-using NServiceBus;
+
 using NServiceBus.Persistence.MongoDB;
 using NServiceBus.Persistence.MongoDB.DataBus;
 
 namespace NServiceBus.Persistence.MongoDb.Example
 {
+    using NServiceBus;
+
     public class EndpointConfig : IConfigureThisEndpoint
     {
-        public void Customize(EndpointConfiguration configuration)
+        public void Customize(EndpointConfiguration endpointConfiguration)
         {
-            configuration.UsePersistence<MongoDbPersistence>();
-            configuration.UseDataBus<MongoDbDataBus>();
+            endpointConfiguration.UsePersistence<MongoDbPersistence>();
+            endpointConfiguration.UseDataBus<MongoDbDataBus>();
+
+            endpointConfiguration.SendFailedMessagesTo("error");
+            endpointConfiguration.AuditProcessedMessagesTo("audit");
         }
     }
 }

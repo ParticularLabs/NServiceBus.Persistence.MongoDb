@@ -68,7 +68,7 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             var nextTimeToRunQuery = startOfNextChunk?.Time ?? DateTime.UtcNow.AddMinutes(10);
 
             return new TimeoutsChunk(
-                results.Select(x => new TimeoutsChunk.Timeout(x.Id, x.Time)).ToList(), 
+                results.Select(x => new TimeoutsChunk.Timeout(x.Id, x.Time)).ToArray(), 
                 nextTimeToRunQuery);
         }
 

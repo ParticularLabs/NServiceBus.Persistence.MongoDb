@@ -17,11 +17,12 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         private readonly IMongoCollection<TimeoutEntity> _collection;
         private static bool _indexCreated = false;
 
-
         public TimeoutPersister(string endpointName, IMongoDatabase database)
         {
             _endpointName = endpointName;
-            _collection = database.GetCollection<TimeoutEntity>("timeouts");
+            _collection = database.GetCollection<TimeoutEntity>("timeouts")
+                .WithReadPreference(ReadPreference.Primary)
+                .WithWriteConcern(WriteConcern.WMajority);
         }
 
         private async Task EnsureIndex()
@@ -30,7 +31,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             {
                 //no locking - if it runs more than once it's okay - performance is higher priority
                 _indexCreated = true;
-                await _collection.Indexes.CreateOneAsync(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId)).ConfigureAwait(false);
+                await _collection.Indexes.CreateOneAsync(
+                    Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId),
+                    new CreateIndexOptions { Background = true }).ConfigureAwait(false);
+
+                await _collection.Indexes.CreateOneAsync(
+                    Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.Endpoint).Ascending(t => t.Time), 
+                    new CreateIndexOptions { Background = true }).ConfigureAwait(false);
             }
         }
 
@@ -75,23 +82,10 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         public async Task Add(TimeoutData timeout, ContextBag context)
         {
             await EnsureIndex().ConfigureAwait(false);
-
-            var timeoutId = Guid.Empty;
-
-            string messageId;
-            if (timeout.Headers != null && timeout.Headers.TryGetValue(Headers.MessageId, out messageId))
-            {
-                Guid.TryParse(messageId, out timeoutId);
-            }
-
-            if (timeoutId == Guid.Empty)
-            {
-                timeoutId = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow);
-            }
-
+            
             await _collection.InsertOneAsync(new TimeoutEntity
             {
-                Id = timeoutId.ToString(),
+                Id = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow).ToString(),
                 Destination = timeout.Destination,
                 SagaId = timeout.SagaId,
                 State = timeout.State,
@@ -102,7 +96,6 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
             }).ConfigureAwait(false);
         }
 
-        //public bool TryRemove(string timeoutId, out TimeoutData timeoutData)
         public async Task<bool> TryRemove(string timeoutId, ContextBag context)
         {
             var query =  Builders<TimeoutEntity>.Filter.Eq(t => t.Id, timeoutId);
@@ -123,8 +116,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         
         public async Task<TimeoutData> Peek(string timeoutId, ContextBag context)
         {
-            var timeoutEntity = await _collection.Find(t => t.Id == timeoutId).FirstOrDefaultAsync().ConfigureAwait(false);
+            var now = DateTime.UtcNow;
 
+            var timeoutEntity = await _collection.FindOneAndUpdateAsync<TimeoutEntity, TimeoutEntity>(
+                e => e.Id == timeoutId && (!e.LockDateTime.HasValue || e.LockDateTime.Value < now.AddSeconds(-10)), 
+                new UpdateDefinitionBuilder<TimeoutEntity>().Set(te => te.LockDateTime, now))
+                    .ConfigureAwait(false);
+            
             return timeoutEntity?.ToTimeoutData();
         }
     }
@@ -175,6 +173,14 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         ///     The timeout manager that owns this particular timeout
         /// </summary>
         public string OwningTimeoutManager { get; set; }
+
+        /// <summary>
+        /// The time when the timeout record was locked. If null then the record has not been locked.
+        /// </summary>
+        /// <remarks>
+        /// Timeout locks are only considered valid for 10 seconds, therefore if the LockDateTime is older than 10 seconds it is no longer valid.
+        /// </remarks>
+        public DateTime? LockDateTime { get; set; }
 
         public TimeoutData ToTimeoutData()
         {

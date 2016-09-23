@@ -67,16 +67,8 @@ namespace NServiceBus.Persistence.MongoDb.Example
 
         public async Task Handle(TestMessage message, IMessageHandlerContext context)
         {
-            if (Data.UserId != message.UserId)
-            {
-                Logger.InfoFormat("[{0}] \tNew saga instance", message.UserId);
-            }
-            else
-            {
-                Logger.InfoFormat("[{0}] \tExisting saga retrieved.  Current version: {1}", message.UserId, Data.Version);
-            }
-
-            Data.UserId = message.UserId;
+            Logger.InfoFormat($"[{message.UserId}] TestSaga TestMessage recieved.  Current version: {Data.Version}");
+            
             Data.Message = $"{Data.Version} - {message.Message}";
             Console.WriteLine(message.DataBusData.Value.Length);
             

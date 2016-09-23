@@ -144,7 +144,9 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         }
         public TimeoutData Peek(string timeoutId)
         {
-            var timeoutEntity = _collection.AsQueryable().SingleOrDefault(e => e.Id == timeoutId);
+            var now = DateTime.UtcNow;
+            var update = new UpdateDefinitionBuilder<TimeoutEntity>().Set(te => te.LockDateTime, now);
+            var timeoutEntity = _collection.FindOneAndUpdate<TimeoutEntity, TimeoutEntity>(e => e.Id == timeoutId && (!e.LockDateTime.HasValue || e.LockDateTime.Value < now.AddSeconds(-10)), update);
             return timeoutEntity?.ToTimeoutData();
         }
     }
@@ -194,6 +196,14 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         ///     The timeout manager that owns this particular timeout
         /// </summary>
         public string OwningTimeoutManager { get; set; }
+
+        /// <summary>
+        /// The time when the timeout record was locked. If null then the record has not been locked.
+        /// </summary>
+        /// <remarks>
+        /// Timeout locks are only considered valid for 10 seconds, therefore if the LockDateTime is older than 10 seconds it is no longer valid.
+        /// </remarks>
+        public DateTime? LockDateTime { get; set; }
 
         public TimeoutData ToTimeoutData()
         {

@@ -17,13 +17,21 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         public TimeoutPersister(IMongoDatabase database)
         {
-            _collection = database.GetCollection<TimeoutEntity>("timeouts");
+            _collection = database.GetCollection<TimeoutEntity>("timeouts")
+                .WithReadPreference(ReadPreference.Primary)
+                .WithWriteConcern(WriteConcern.WMajority);
         }
 
 
         void IWantToRunWhenBusStartsAndStops.Start()
         {
-            _collection.Indexes.CreateOne(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId));
+            _collection.Indexes.CreateOne(
+                Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId), 
+                new CreateIndexOptions {Background = true});
+
+            _collection.Indexes.CreateOne(
+                Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.Endpoint).Ascending(t => t.Time), 
+                new CreateIndexOptions { Background = true });
         }
 
         void IWantToRunWhenBusStartsAndStops.Stop()
@@ -76,22 +84,9 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         public void Add(TimeoutData timeout)
         {
-            var timeoutId = Guid.Empty;
-
-            string messageId;
-            if (timeout.Headers != null && timeout.Headers.TryGetValue(Headers.MessageId, out messageId))
-            {
-                Guid.TryParse(messageId, out timeoutId);
-            }
-
-            if (timeoutId == Guid.Empty)
-            {
-                timeoutId = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow);
-            }
-
             _collection.InsertOne(new TimeoutEntity
             {
-                Id = timeoutId.ToString(),
+                Id = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow).ToString(),
                 Destination = timeout.Destination,
                 SagaId = timeout.SagaId,
                 State = timeout.State,

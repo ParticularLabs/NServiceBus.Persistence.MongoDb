@@ -16,7 +16,7 @@
         <dependency id="MongoDB.Driver" version="2.3.0" />
         <dependency id="MongoDB.Driver.Core" version="2.3.0" />
         <dependency id="MongoDB.Driver.GridFS" version="2.3.0" />
-        <dependency id="NServiceBus" version="[6.0.0-rc0002, 7.0.0)" />
+        <dependency id="NServiceBus" version="[6.0.0, 7.0.0)" />
       </dependencies>
   </metadata>
 </package>

@@ -17,13 +17,21 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         public TimeoutPersister(IMongoDatabase database)
         {
-            _collection = database.GetCollection<TimeoutEntity>("timeouts");
+            _collection = database.GetCollection<TimeoutEntity>("timeouts")
+                .WithReadPreference(ReadPreference.Primary)
+                .WithWriteConcern(WriteConcern.WMajority);
         }
 
 
         void IWantToRunWhenBusStartsAndStops.Start()
         {
-            _collection.Indexes.CreateOne(Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId));
+            _collection.Indexes.CreateOne(
+                Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.SagaId), 
+                new CreateIndexOptions {Background = true});
+
+            _collection.Indexes.CreateOne(
+                Builders<TimeoutEntity>.IndexKeys.Ascending(t => t.Endpoint).Ascending(t => t.Time), 
+                new CreateIndexOptions { Background = true });
         }
 
         void IWantToRunWhenBusStartsAndStops.Stop()
@@ -76,22 +84,9 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
 
         public void Add(TimeoutData timeout)
         {
-            var timeoutId = Guid.Empty;
-
-            string messageId;
-            if (timeout.Headers != null && timeout.Headers.TryGetValue(Headers.MessageId, out messageId))
-            {
-                Guid.TryParse(messageId, out timeoutId);
-            }
-
-            if (timeoutId == Guid.Empty)
-            {
-                timeoutId = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow);
-            }
-
             _collection.InsertOne(new TimeoutEntity
             {
-                Id = timeoutId.ToString(),
+                Id = CombGuidGenerator.Instance.NewCombGuid(Guid.NewGuid(), DateTime.UtcNow).ToString(),
                 Destination = timeout.Destination,
                 SagaId = timeout.SagaId,
                 State = timeout.State,
@@ -144,7 +139,9 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         }
         public TimeoutData Peek(string timeoutId)
         {
-            var timeoutEntity = _collection.AsQueryable().SingleOrDefault(e => e.Id == timeoutId);
+            var now = DateTime.UtcNow;
+            var update = new UpdateDefinitionBuilder<TimeoutEntity>().Set(te => te.LockDateTime, now);
+            var timeoutEntity = _collection.FindOneAndUpdate<TimeoutEntity, TimeoutEntity>(e => e.Id == timeoutId && (!e.LockDateTime.HasValue || e.LockDateTime.Value < now.AddSeconds(-10)), update);
             return timeoutEntity?.ToTimeoutData();
         }
     }
@@ -194,6 +191,14 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         ///     The timeout manager that owns this particular timeout
         /// </summary>
         public string OwningTimeoutManager { get; set; }
+
+        /// <summary>
+        /// The time when the timeout record was locked. If null then the record has not been locked.
+        /// </summary>
+        /// <remarks>
+        /// Timeout locks are only considered valid for 10 seconds, therefore if the LockDateTime is older than 10 seconds it is no longer valid.
+        /// </remarks>
+        public DateTime? LockDateTime { get; set; }
 
         public TimeoutData ToTimeoutData()
         {

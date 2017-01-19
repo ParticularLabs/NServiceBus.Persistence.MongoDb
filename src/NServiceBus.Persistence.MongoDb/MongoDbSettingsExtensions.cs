@@ -24,5 +24,12 @@ namespace NServiceBus.Persistence.MongoDB
             return cfg;
         }
 
+        public static PersistenceExtentions<MongoDbPersistence> SetDatabaseName(
+            this PersistenceExtentions<MongoDbPersistence> cfg, string databaseName)
+        {
+            cfg.GetSettings().Set(MongoPersistenceSettings.DatabaseName, databaseName);
+            return cfg;
+        }
+
     }
 }

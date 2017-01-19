@@ -17,7 +17,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
     {
         public const string ConnectionStringName = "MongoDbConnectionStringName";
         public const string ConnectionString = "MongoDbConnectionString";
-        
+        public const string DatabaseName = "MongoDbDatabaseName";
     }
 
     public static class MongoPersistenceConnectionStringNames
@@ -25,7 +25,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
         public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
     }
 
-    
+
     public class MongoDbStorage : Feature
     {
         internal MongoDbStorage()
@@ -37,19 +37,51 @@ namespace NServiceBus.Persistence.MongoDB.Database
         /// </summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
-            if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionStringName))
-            {
-                context.Container.MongoDbPersistence(context.Settings.Get<string>(MongoPersistenceSettings.ConnectionStringName));
-            }
+            string connectionString = GetConnectionString(context);
 
-            else if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionString))
+            if (context.Settings.HasSetting(MongoPersistenceSettings.DatabaseName))
             {
-                context.Container.MongoDbPersistence(() => context.Settings.Get<string>(MongoPersistenceSettings.ConnectionString));
+                context.Container.MongoPersistence(connectionString, context.Settings.Get<string>(MongoPersistenceSettings.DatabaseName));
             }
             else
             {
-                context.Container.MongoDbPersistence();
+                context.Container.MongoPersistence(connectionString);
             }
+        }
+
+        private static string GetConnectionString(FeatureConfigurationContext context)
+        {
+            string connectionString;
+            if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionStringName))
+            {
+                connectionString = GetConnectionStringByName(context.Settings.Get<string>(MongoPersistenceSettings.ConnectionStringName));
+            }
+            else if (context.Settings.HasSetting(MongoPersistenceSettings.ConnectionString))
+            {
+                connectionString = context.Settings.Get<string>(MongoPersistenceSettings.ConnectionString);
+                if (String.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new ConfigurationErrorsException("Cannot configure Mongo Persister. No connection string was found");
+                }
+            }
+            else
+            {
+                connectionString = GetConnectionStringByName(MongoPersistenceConnectionStringNames.DefaultConnectionStringName);
+            }
+
+            return connectionString;
+        }
+
+        private static string GetConnectionStringByName(string connectionStringName)
+        {
+            var connectionStringEntry = ConfigurationManager.ConnectionStrings[connectionStringName];
+
+            if (connectionStringEntry == null)
+            {
+                throw new ConfigurationErrorsException(string.Format("Cannot configure Mongo Persister. No connection string named {0} was found", connectionStringName));
+            }
+
+            return connectionStringEntry.ConnectionString;
         }
     }
 
@@ -59,58 +91,38 @@ namespace NServiceBus.Persistence.MongoDB.Database
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (database == null) throw new ArgumentNullException(nameof(database));
-            
+
             config.RegisterSingleton(database);
-            
-            
+
+
             return config;
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, string connectionStringName)
+        public static ObjectBuilder.IConfigureComponents MongoPersistence(this ObjectBuilder.IConfigureComponents config, string connectionString, string databaseName)
         {
-            var connectionStringEntry = ConfigurationManager.ConnectionStrings[connectionStringName];
-
-            if (connectionStringEntry == null)
-            {
-                throw new ConfigurationErrorsException(string.Format("Cannot configure Mongo Persister. No connection string named {0} was found", connectionStringName));
-            }
-
-            var connectionString = connectionStringEntry.ConnectionString;
-            return MongoPersistenceWithConectionString(config, connectionString);
-        }
-
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config)
-        {
-            return MongoDbPersistence(config, MongoPersistenceConnectionStringNames.DefaultConnectionStringName);
-        }
-
-        public static ObjectBuilder.IConfigureComponents MongoPersistenceWithConectionString(ObjectBuilder.IConfigureComponents config, string connectionString)
-        {
-            var databaseName = MongoUrl.Create(connectionString).DatabaseName;
             if (String.IsNullOrWhiteSpace(databaseName))
             {
-                throw new ConfigurationErrorsException("Cannot configure Mongo Persister. Database name not present in the connection string.");
+                throw new ConfigurationErrorsException("Cannot configure Mongo Persister. No database name was found");
             }
-
-
 
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
 
-
             return MongoDbPersistence(config, database);
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, Func<string> getConnectionString)
+        public static ObjectBuilder.IConfigureComponents MongoPersistence(this ObjectBuilder.IConfigureComponents config, string connectionString)
         {
-            var connectionString = getConnectionString();
-
-            if (String.IsNullOrWhiteSpace(connectionString))
+            var databaseName = MongoUrl.Create(connectionString).DatabaseName;
+            if (string.IsNullOrWhiteSpace(databaseName))
             {
-                throw new ConfigurationErrorsException("Cannot configure Mongo Persister. No connection string was found");
+                throw new ConfigurationErrorsException("Cannot configure Mongo Persister. Database name not present in the connection string.");
             }
-            
-            return MongoPersistenceWithConectionString(config, connectionString);
+
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+
+            return MongoDbPersistence(config, database);
         }
     }
 }

@@ -11,6 +11,7 @@ using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 {
+    [TestFixture]
     public class MongoFixture
     {
         private IMongoDatabase _database;

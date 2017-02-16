@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence;
-using NServiceBus.Persistence.MongoDB.Gateway;
-using NServiceBus.Persistence.MongoDB.Timeout;
-using NServiceBus.Support;
-using NServiceBus.Timeout.Core;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.Gateway

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
 using NServiceBus.Persistence.MongoDB;
-using NServiceBus.Sagas;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 {

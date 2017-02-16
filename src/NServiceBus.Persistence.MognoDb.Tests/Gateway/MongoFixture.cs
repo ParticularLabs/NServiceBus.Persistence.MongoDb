@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Configuration;
 using System.Globalization;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Gateway.Deduplication;
-using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Persistence.MongoDB.Gateway;
 using NUnit.Framework;
 

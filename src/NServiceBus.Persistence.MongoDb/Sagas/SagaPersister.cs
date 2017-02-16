@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
 using NServiceBus.Extensibility;
-using NServiceBus.Persistence.MongoDB.Database;
 using NServiceBus.Sagas;
 
 namespace NServiceBus.Persistence.MongoDB.Sagas

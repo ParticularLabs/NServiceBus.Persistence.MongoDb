@@ -18,9 +18,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 PolymorpicRelatedProperty = new PolymorpicProperty {SomeInt = 9}
             };
 
-            await SaveSaga(_entity);
+            await SaveSaga(_entity).ConfigureAwait(false);
 
-            _savedEntity = await LoadSaga<TestSaga>(_entity.Id);
+            _savedEntity = await LoadSaga<TestSaga>(_entity.Id).ConfigureAwait(false);
         }
 
         [Test]

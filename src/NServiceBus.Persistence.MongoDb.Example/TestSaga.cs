@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using NServiceBus.Config;
 using NServiceBus.Logging;
 using NServiceBus.Persistence.MongoDB;
 
@@ -29,7 +25,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
                             message.UserId = id; //console input
                             message.Message = Guid.NewGuid().ToString(); //random text
                             message.DataBusData = new DataBusProperty<byte[]>(new byte[1024*1024*5]); //5MB
-                        });
+                        }).ConfigureAwait(false);
 
                         Logger.InfoFormat("Message sent with Id = {0}", id);
                     }
@@ -72,7 +68,7 @@ namespace NServiceBus.Persistence.MongoDb.Example
             Data.Message = $"{Data.Version} - {message.Message}";
             Console.WriteLine(message.DataBusData.Value.Length);
             
-            await RequestTimeout<TestSagaTimeout>(context, TimeSpan.FromSeconds(10));
+            await RequestTimeout<TestSagaTimeout>(context, TimeSpan.FromSeconds(10)).ConfigureAwait(false);
 
             if (Data.Version == 10)
             {

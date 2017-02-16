@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NServiceBus.Support;
 using NServiceBus.Timeout.Core;
@@ -13,11 +12,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
     public class When_fetching_timeouts_from_storage : MongoFixture
     {
         [Test]
-        public async Task Should_persist_with_common_nservicebus_headers()
+        public Task Should_persist_with_common_nservicebus_headers()
         {
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            await Storage.Add(new TimeoutData
+            return Storage.Add(new TimeoutData
             {
                 Time = nextTime,
                 Destination = $"timeouts@{RuntimeEnvironment.MachineName}",
@@ -43,11 +42,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
                     State = new byte[] { 0, 0, 133 },
                     Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                     OwningTimeoutManager = "MyTestEndpoint",
-                }, null);
+                }, null).ConfigureAwait(false);
             }
             
             
-            Assert.AreEqual(numberOfTimeoutsToAdd, (await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3))).DueTimeouts.Count());
+            Assert.AreEqual(numberOfTimeoutsToAdd, (await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3)).ConfigureAwait(false)).DueTimeouts.Count());
         }
 
         [Test]
@@ -63,9 +62,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
                 State = new byte[] { 0, 0, 133 },
                 Headers = new Dictionary<string, string> { { "Bar", "34234" }, { "Foo", "aString1" }, { "Super", "aString2" } },
                 OwningTimeoutManager = "MyTestEndpoint",
-            }, null);
+            }, null).ConfigureAwait(false);
 
-            var result = await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3));
+            var result = await Storage.GetNextChunk(DateTime.UtcNow.AddYears(-3)).ConfigureAwait(false);
 
             Assert.IsTrue((nextTime - result.NextTimeToQuery).TotalSeconds < 1);
         }

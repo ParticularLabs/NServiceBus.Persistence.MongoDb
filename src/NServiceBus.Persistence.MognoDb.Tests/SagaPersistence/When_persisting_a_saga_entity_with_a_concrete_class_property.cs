@@ -14,9 +14,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
         {
             _entity = new TestSaga {Id = Guid.NewGuid(), TestComponent = new TestComponent {Property = "Prop"}};
 
-            await SaveSaga(_entity);
+            await SaveSaga(_entity).ConfigureAwait(false);
 
-            _savedEntity = await LoadSaga<TestSaga>(_entity.Id);
+            _savedEntity = await LoadSaga<TestSaga>(_entity.Id).ConfigureAwait(false);
         }
 
         [Test]

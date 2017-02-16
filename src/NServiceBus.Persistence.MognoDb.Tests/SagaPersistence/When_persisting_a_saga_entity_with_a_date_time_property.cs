@@ -18,9 +18,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 DateTimeProperty = DateTime.Parse("12/02/2010 12:00:00.01").ToUniversalTime()
             };
 
-            await SaveSaga(_entity);
+            await SaveSaga(_entity).ConfigureAwait(false);
 
-            _savedEntity = await LoadSaga<TestSaga>(_entity.Id);
+            _savedEntity = await LoadSaga<TestSaga>(_entity.Id).ConfigureAwait(false);
         }
 
         [Test]

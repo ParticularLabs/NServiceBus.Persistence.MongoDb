@@ -21,9 +21,9 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 UniqueString = "whatever"
             };
 
-            await SaveSaga(saga1);
-            await CompleteSaga<SagaWithUniqueProperty>(saga1.Id);
-            await SaveSaga(saga2);
+            await SaveSaga(saga1).ConfigureAwait(false);
+            await CompleteSaga<SagaWithUniqueProperty>(saga1.Id).ConfigureAwait(false);
+            await SaveSaga(saga2).ConfigureAwait(false);
         }
     }
 }

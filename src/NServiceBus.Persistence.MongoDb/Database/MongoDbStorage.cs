@@ -66,7 +66,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
             return config;
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, string connectionStringName)
+        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, string connectionStringName)
         {
             var connectionStringEntry = ConfigurationManager.ConnectionStrings[connectionStringName];
 
@@ -79,12 +79,12 @@ namespace NServiceBus.Persistence.MongoDB.Database
             return MongoPersistenceWithConectionString(config, connectionString);
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config)
+        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config)
         {
             return MongoDbPersistence(config, MongoPersistenceConnectionStringNames.DefaultConnectionStringName);
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoPersistenceWithConectionString(ObjectBuilder.IConfigureComponents config, string connectionString)
+        public static IConfigureComponents MongoPersistenceWithConectionString(IConfigureComponents config, string connectionString)
         {
             var databaseName = MongoUrl.Create(connectionString).DatabaseName;
             if (String.IsNullOrWhiteSpace(databaseName))
@@ -101,7 +101,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
             return MongoDbPersistence(config, database);
         }
 
-        public static ObjectBuilder.IConfigureComponents MongoDbPersistence(this ObjectBuilder.IConfigureComponents config, Func<string> getConnectionString)
+        public static IConfigureComponents MongoDbPersistence(this IConfigureComponents config, Func<string> getConnectionString)
         {
             var connectionString = getConnectionString();
 

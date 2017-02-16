@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence;
-using NServiceBus.Persistence.MongoDB.Gateway;
-using NServiceBus.Persistence.MongoDB.Timeout;
-using NServiceBus.Support;
-using NServiceBus.Timeout.Core;
 using NUnit.Framework;
 
 namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
@@ -22,8 +12,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test2", timeReceived, null));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test2", timeReceived, null).ConfigureAwait(false));
         }
 
         [TestCase]
@@ -31,8 +21,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
-            Assert.IsFalse(await Deduplication.DeduplicateMessage("test", timeReceived, null));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
+            Assert.IsFalse(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
         }
     }
 }

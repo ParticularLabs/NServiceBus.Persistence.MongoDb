@@ -17,15 +17,15 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 NonUniqueString = "notUnique"
             };
 
-            await SaveSaga(saga1);
+            await SaveSaga(saga1).ConfigureAwait(false);
             
             await UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>
             {
                 s.NonUniqueString = "notUnique2";
                 s.UniqueString = "whatever2";
-            });
+            }).ConfigureAwait(false);
 
-            saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id);
+            saga1 = await LoadSaga<SagaWithoutUniqueProperties>(saga1.Id).ConfigureAwait(false);
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 
@@ -40,7 +40,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 NonUniqueString = "notUnique"
             };
 
-            await SaveSaga(saga1);
+            await SaveSaga(saga1).ConfigureAwait(false);
 
             Assert.ThrowsAsync<SagaMongoDbConcurrentUpdateException>(() => 
                 UpdateSaga<SagaWithoutUniqueProperties>(saga1.Id, s =>

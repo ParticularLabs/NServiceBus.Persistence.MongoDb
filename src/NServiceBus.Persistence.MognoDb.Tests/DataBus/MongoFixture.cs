@@ -37,7 +37,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
             var byteArray = Encoding.ASCII.GetBytes(content);
             using (var stream = new MemoryStream(byteArray))
             {
-                return await GridFsDataBus.Put(stream, timeToLive);
+                return await GridFsDataBus.Put(stream, timeToLive).ConfigureAwait(false);
             }
         }
 

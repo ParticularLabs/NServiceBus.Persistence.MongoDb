@@ -15,8 +15,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         {
             const string content = "Test";
 
-            var key = await Put(content, TimeSpan.MaxValue);
-            using (var stream = await GridFsDataBus.Get(key))
+            var key = await Put(content, TimeSpan.MaxValue).ConfigureAwait(false);
+            using (var stream = await GridFsDataBus.Get(key).ConfigureAwait(false))
             {
                 Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
             }
@@ -27,21 +27,21 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         {
             const string content = "Test";
 
-            var key = await Put(content, TimeSpan.MaxValue);
+            var key = await Put(content, TimeSpan.MaxValue).ConfigureAwait(false);
 
 
             var tasks = Enumerable.Range(0, 10).Select(i =>
             {
                 return Task.Run(async () =>
                 {
-                    using(var stream = await GridFsDataBus.Get(key))
+                    using(var stream = await GridFsDataBus.Get(key).ConfigureAwait(false))
                     {
                         Assert.AreEqual(content, new StreamReader(stream).ReadToEnd());
                     }
                 });
             });
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         [Test]

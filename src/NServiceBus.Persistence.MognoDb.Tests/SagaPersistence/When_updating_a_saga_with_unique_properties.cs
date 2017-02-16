@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
 
@@ -18,11 +17,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                                 NonUniqueString = "notUnique"
                             };
 
-            await SaveSaga(saga1);
+            await SaveSaga(saga1).ConfigureAwait(false);
 
-            await UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.NonUniqueString = "notUnique2");
+            await UpdateSaga<SagaWithUniqueProperty>(saga1.Id, s => s.NonUniqueString = "notUnique2").ConfigureAwait(false);
 
-            saga1 = await LoadSaga<SagaWithUniqueProperty>(saga1.Id);
+            saga1 = await LoadSaga<SagaWithUniqueProperty>(saga1.Id).ConfigureAwait(false);
             Assert.AreEqual("notUnique2", saga1.NonUniqueString);
         }
 
@@ -36,7 +35,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
                 NonUniqueString = "notUnique"
             };
 
-            await SaveSaga(saga);
+            await SaveSaga(saga).ConfigureAwait(false);
 
 
             saga.Id = Guid.NewGuid();

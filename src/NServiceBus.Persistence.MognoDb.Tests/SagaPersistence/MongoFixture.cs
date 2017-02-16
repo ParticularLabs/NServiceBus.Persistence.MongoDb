@@ -35,11 +35,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             _database = _client.GetDatabase(_databaseName);
             _repo = new MongoDbSagaRepository(_database);
 
-            
             _sagaPersister = new SagaPersister(_repo);
         }
-
-        protected ISagaPersister SagaPersister => _sagaPersister;
 
         [TearDown]
         public void TeardownContext() => _client.DropDatabase(_databaseName);

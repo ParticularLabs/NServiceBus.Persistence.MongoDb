@@ -13,7 +13,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
             var messageTypes = new[] {new MessageType(typeof (MessageA)), new MessageType(typeof (MessageB))};
 
             foreach(var messageType in messageTypes)
-                await Storage.Subscribe(TestClients.ClientA, messageType, null);
+                await Storage.Subscribe(TestClients.ClientA, messageType, null).ConfigureAwait(false);
 
             var count = Subscriptions.Count();
 
@@ -23,8 +23,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [Test]
         public async Task Duplicate_subcription_shouldnt_create_additional_db_rows()
         {
-            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null);
-            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null).ConfigureAwait(false);
             
             var count = Subscriptions.Count();
             Assert.AreEqual(count, 1);

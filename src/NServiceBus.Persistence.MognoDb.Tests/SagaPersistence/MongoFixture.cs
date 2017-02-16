@@ -63,17 +63,17 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
 
         protected async Task CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
         {
-            var saga = await LoadSaga<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga);
-            await _sagaPersister.Complete(saga, null, null);
+            await _sagaPersister.Complete(saga, null, null).ConfigureAwait(false);
         }
 
         protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
         {
-            var saga = await LoadSaga<T>(sagaId);
+            var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga, "Could not update saga. Saga not found");
             update(saga);
-            await _sagaPersister.Update(saga, null, null);
+            await _sagaPersister.Update(saga, null, null).ConfigureAwait(false);
         }
 
         protected void ChangeSagaVersionManually<T>(Guid sagaId, int version)  where T: IContainSagaData

@@ -11,12 +11,12 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [Test]
         public async Task The_names_of_all_subscribers_should_be_returned()
         {
-            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null);
-            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB, null);
-            await Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageA, null);
-            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageAv2, null);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageA, null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageB, null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientB, MessageTypes.MessageA, null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientA, MessageTypes.MessageAv2, null).ConfigureAwait(false);
 
-            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new [] { MessageTypes.MessageA }, null);
+            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new [] { MessageTypes.MessageA }, null).ConfigureAwait(false);
 
             Assert.AreEqual(2, subscriptionsForMessageType.Count());
             var firstSub = subscriptionsForMessageType.First();
@@ -27,11 +27,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [Test]
         public async Task Duplicates_should_not_be_generated_for_interface_inheritance_chains()
         {
-            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), null);
-            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface2)), null);
-            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface3)), null);
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface)), null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface2)), null).ConfigureAwait(false);
+            await Storage.Subscribe(TestClients.ClientA, new MessageType(typeof(ISomeInterface3)), null).ConfigureAwait(false);
 
-            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new[] { new MessageType(typeof(ISomeInterface)), new MessageType(typeof(ISomeInterface2)), new MessageType(typeof(ISomeInterface3)) }, null);
+            var subscriptionsForMessageType = await Storage.GetSubscriberAddressesForMessage(new[] { new MessageType(typeof(ISomeInterface)), new MessageType(typeof(ISomeInterface2)), new MessageType(typeof(ISomeInterface3)) }, null).ConfigureAwait(false);
 
             Assert.AreEqual(1, subscriptionsForMessageType.Count());
         }

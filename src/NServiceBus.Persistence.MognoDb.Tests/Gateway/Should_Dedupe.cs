@@ -22,8 +22,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test2", timeReceived, null));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test2", timeReceived, null).ConfigureAwait(false));
         }
 
         [TestCase]
@@ -31,8 +31,8 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         {
             var timeReceived = DateTime.Today;
 
-            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null));
-            Assert.IsFalse(await Deduplication.DeduplicateMessage("test", timeReceived, null));
+            Assert.IsTrue(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
+            Assert.IsFalse(await Deduplication.DeduplicateMessage("test", timeReceived, null).ConfigureAwait(false));
         }
     }
 }

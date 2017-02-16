@@ -12,11 +12,11 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
     public class When_fetching_timeouts_from_storage : MongoFixture
     {
         [Test]
-        public async Task Should_persist_with_common_nservicebus_headers()
+        public Task Should_persist_with_common_nservicebus_headers()
         {
             var nextTime = DateTime.UtcNow.AddHours(1);
 
-            await Storage.Add(new TimeoutData
+            return Storage.Add(new TimeoutData
             {
                 Time = nextTime,
                 Destination = $"timeouts@{RuntimeEnvironment.MachineName}",
@@ -24,7 +24,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
                 State = new byte[] { 0, 0, 133 },
                 Headers = new Dictionary<string, string> { { Headers.MessageId, Guid.NewGuid().ToString() }, { Headers.NServiceBusVersion, Guid.NewGuid().ToString() }, { Headers.OriginatingAddress, Guid.NewGuid().ToString() } },
                 OwningTimeoutManager = "MyTestEndpoint",
-            }, null).ConfigureAwait(false);
+            }, null);
         }
 
         [Test]

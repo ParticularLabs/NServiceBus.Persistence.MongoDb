@@ -24,17 +24,17 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             await _repo.Insert(sagaData).ConfigureAwait(false);
         }
 
-        private async Task EnsureUniqueIndex(Type sagaDataType, string propertyName)
+        private Task EnsureUniqueIndex(Type sagaDataType, string propertyName)
         {
             if (propertyName == null)
             {
-                return;
+                return Task.FromResult(0);
             }
             
             var classmap = BsonClassMap.LookupClassMap(sagaDataType);
             var uniqueFieldName = GetFieldName(classmap, propertyName);
 
-            await _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName).ConfigureAwait(false);
+            return _repo.EnsureUniqueIndex(sagaDataType, uniqueFieldName);
         }
 
         public Task Update(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)
@@ -52,13 +52,12 @@ namespace NServiceBus.Persistence.MongoDB.Sagas
             return _repo.FindById<TSagaData>(sagaId);
         }
 
-        public async Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
+        public Task<TSagaData> Get<TSagaData>(string propertyName, object propertyValue, SynchronizedStorageSession session, ContextBag context) where TSagaData : IContainSagaData
         {
             var classmap = BsonClassMap.LookupClassMap(typeof(TSagaData));
             var propertyFieldName = GetFieldName(classmap, propertyName);
 
-            var result = await _repo.FindByFieldName<TSagaData>(propertyFieldName, propertyValue).ConfigureAwait(false);
-            return result;
+            return _repo.FindByFieldName<TSagaData>(propertyFieldName, propertyValue);
         }
 
         public Task Complete(IContainSagaData sagaData, SynchronizedStorageSession session, ContextBag context)

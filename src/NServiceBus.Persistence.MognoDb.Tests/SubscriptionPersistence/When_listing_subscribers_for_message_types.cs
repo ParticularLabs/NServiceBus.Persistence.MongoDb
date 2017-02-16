@@ -20,7 +20,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
 
             Assert.AreEqual(2, subscriptionsForMessageType.Count());
             var firstSub = subscriptionsForMessageType.First();
-            Assert.AreEqual(TestClients.ClientA.Endpoint.ToString(), firstSub.Endpoint.ToString());
+            Assert.AreEqual(TestClients.ClientA.Endpoint, firstSub.Endpoint);
             Assert.AreEqual(TestClients.ClientA.TransportAddress, firstSub.TransportAddress);
         }
 

@@ -9,62 +9,60 @@ namespace NServiceBus.Persistence.MongoDB.Database
     internal static class MongoIndexEnsurenceManager<T>
     {
         private const string UniquenessKey = "unique";
-        private const string IndexName = "name";
+        private const string IndexNameKey = "name";
         private const string BsonDocumentKey = "key";
 
-        private enum IndexEnsurenceAction
+        private enum IndexEnsurenceActionType
         {
             Create,
             Recreate,
             None
         }
 
-        private delegate Task IndexExistenceDelegate(
+        private delegate Task IndexEnsurenceActionDelegate(
             IMongoIndexManager<T> indexManager, BsonDocument key, CreateIndexOptions options,
-            IEnumerable<BsonDocument> indexes);
+            BsonDocument existingIndex);
 
-        private static readonly Dictionary<IndexEnsurenceAction, IndexExistenceDelegate> IndexEnsurenceActionHandlers = new Dictionary
-            <IndexEnsurenceAction, IndexExistenceDelegate>()
-        {
-            {IndexEnsurenceAction.Create, CreateIndex},
-            {IndexEnsurenceAction.Recreate, DropAndCreateIndex},
-            {IndexEnsurenceAction.None, (manager, index, options, indexes) => Task.FromResult(false)}
-        };
-
-
-
+        private static readonly Dictionary<IndexEnsurenceActionType, IndexEnsurenceActionDelegate>
+            IndexEnsurenceActionHandlers = new Dictionary
+                <IndexEnsurenceActionType, IndexEnsurenceActionDelegate>()
+            {
+                {
+                    IndexEnsurenceActionType.Create,
+                    (manager, index, options, existingIndex) => CreateIndex(manager, index, options)
+                },
+                {IndexEnsurenceActionType.Recreate, DropAndCreateIndex},
+                {IndexEnsurenceActionType.None, (manager, index, options, existingIndex) => Task.FromResult(false)}
+            };
+        
         public static async Task EnsureIndex(IMongoIndexManager<T> indexManager, BsonDocument indexToEnsure,
             CreateIndexOptions options = null)
         {
             if (options == null)
                 options = new CreateIndexOptions();
             var collectionIndexes = await indexManager.IndexesToList().ConfigureAwait(false);
-            var action = IndexExists(collectionIndexes, indexToEnsure, options);
-            await IndexEnsurenceActionHandlers[action].Invoke(indexManager, indexToEnsure, options, collectionIndexes).ConfigureAwait(false);
-        }
-
-        private static IndexEnsurenceAction IndexExists(IEnumerable<BsonDocument> collectionIndexes, BsonDocument indexToEnsure,
-            CreateIndexOptions options)
-        {
             var existingIndex = collectionIndexes.FirstOrDefault(index =>
                 index[BsonDocumentKey].Equals(indexToEnsure));
+            var action = GetIndexEnsurenceAction(existingIndex, options);
+            await IndexEnsurenceActionHandlers[action].Invoke(indexManager, indexToEnsure, options, existingIndex).ConfigureAwait(false);
+        }
 
+        private static IndexEnsurenceActionType GetIndexEnsurenceAction(BsonDocument existingIndex,
+            CreateIndexOptions options)
+        {
             //no such index key -> create index
             if (existingIndex == null)
-                return IndexEnsurenceAction.Create;
+                return IndexEnsurenceActionType.Create;
 
             //if nonunique index required, no matter unique/nonunique index was created before -> do nothing
             //if unique index required and current index options are the same -> do nothing
             if (!options.Unique.HasValue || !options.Unique.Value
-                || collectionIndexes.Any(
-                    index =>
-                        index[BsonDocumentKey].Equals(indexToEnsure) &&
-                        index.Contains(UniquenessKey)
-                        && index[UniquenessKey].AsBoolean == true))
-                return IndexEnsurenceAction.None;
+                || (existingIndex.Contains(UniquenessKey)
+                    && existingIndex[UniquenessKey].AsBoolean == true))
+                return IndexEnsurenceActionType.None;
 
-            //collection has index on same fields with different options with name by default -> drop and create index
-            return IndexEnsurenceAction.Recreate;
+            //collection has index on same fields with different options -> drop and create index
+            return IndexEnsurenceActionType.Recreate;
         }
 
 
@@ -76,10 +74,9 @@ namespace NServiceBus.Persistence.MongoDB.Database
         /// <param name="indexManager">Mongo index manager.</param>
         /// <param name="indexToEnsure">Index to recreate.</param>
         /// <param name="options">Options for creating an index.</param>
-        /// <param name="collectionIndexes">Set of collection indexes.</param>
         /// <returns>Task to await index recreation.</returns>
         private static Task CreateIndex(IMongoIndexManager<T> indexManager, BsonDocument indexToEnsure,
-            CreateIndexOptions options, IEnumerable<BsonDocument> collectionIndexes)
+            CreateIndexOptions options)
         {
             return indexManager.CreateOneAsync(new BsonDocumentIndexKeysDefinition<T>(indexToEnsure), options);
         }
@@ -90,14 +87,12 @@ namespace NServiceBus.Persistence.MongoDB.Database
         /// <param name="indexManager">Mongo index manager.</param>
         /// <param name="indexToEnsure">Index to recreate.</param>
         /// <param name="options">Options for creating an index.</param>
-        /// <param name="collectionIndexes">Set of collection indexes.</param>
+        /// <param name="existingIndex">Existing index.</param>
         /// <returns>Task to await index recreation.</returns>
         private static async Task DropAndCreateIndex(IMongoIndexManager<T> indexManager, BsonDocument indexToEnsure,
-            CreateIndexOptions options, IEnumerable<BsonDocument> collectionIndexes)
+            CreateIndexOptions options, BsonDocument existingIndex)
         {
-            // index can have custom name
-            var indexName = collectionIndexes.First(index => index[BsonDocumentKey].Equals(indexToEnsure))[IndexName].ToString();
-
+            var indexName = existingIndex[IndexNameKey].ToString();
             await indexManager.DropOneAsync(indexName).ConfigureAwait(false);
 
             await

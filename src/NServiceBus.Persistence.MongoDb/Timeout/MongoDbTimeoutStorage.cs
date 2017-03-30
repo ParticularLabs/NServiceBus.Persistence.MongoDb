@@ -19,9 +19,13 @@ namespace NServiceBus.Persistence.MongoDB.Timeout
         {
             context.Container.ConfigureComponent(b =>
             {
-                return new TimeoutPersister(context.Settings.EndpointName().ToString(), b.Build<IMongoDatabase>());
-                
+                var timeoutPersister = new TimeoutPersister(context.Settings.EndpointName().ToString(),
+                    b.Build<IMongoDatabase>());
+                timeoutPersister.Init();
+                return timeoutPersister;
+
             }, DependencyLifecycle.InstancePerCall);
+
         }
     }
 }

@@ -10,6 +10,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
     {
         public const string SubscriptionCollectionName = "subscriptions";
         public const string DeduplicationCollectionName = "deduplication";
+        public const string TimeoutCollectionName = "timeouts";
         public const string SagaUniqueIdentityCollectionName = "saga_unique_ids";
     }
 
@@ -17,7 +18,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
     {
         public const string ConnectionStringName = "MongoDbConnectionStringName";
         public const string ConnectionString = "MongoDbConnectionString";
-        
+
     }
 
     public static class MongoPersistenceConnectionStringNames
@@ -25,7 +26,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
         public const string DefaultConnectionStringName = "NServiceBus/Persistence/MongoDB";
     }
 
-    
+
     public class MongoDbStorage : Feature
     {
         internal MongoDbStorage()
@@ -59,10 +60,10 @@ namespace NServiceBus.Persistence.MongoDB.Database
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (database == null) throw new ArgumentNullException(nameof(database));
-            
+
             config.RegisterSingleton(database);
-            
-            
+
+
             return config;
         }
 
@@ -109,7 +110,7 @@ namespace NServiceBus.Persistence.MongoDB.Database
             {
                 throw new ConfigurationErrorsException("Cannot configure Mongo Persister. No connection string was found");
             }
-            
+
             return MongoPersistenceWithConectionString(config, connectionString);
         }
     }

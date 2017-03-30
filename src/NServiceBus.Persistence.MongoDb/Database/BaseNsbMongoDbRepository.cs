@@ -31,8 +31,8 @@ namespace NServiceBus.Persistence.MongoDB.Database
 
         public Task EnsureUniqueIndex(Type entityType, string fieldName)
         {
-            return GetCollection(entityType).Indexes.CreateOneAsync(
-                new BsonDocumentIndexKeysDefinition<BsonDocument>(new BsonDocument(fieldName, 1)), new CreateIndexOptions() { Unique = true });
+            return GetCollection(entityType)
+                .Indexes.EnsureIndex(new BsonDocument(fieldName, 1), new CreateIndexOptions { Unique = true });
         }
 
         protected static T Deserialize<T>(BsonDocument doc)

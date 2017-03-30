@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using NServiceBus.Extensibility;
 using NServiceBus.Persistence.MongoDB.Database;
@@ -13,7 +14,11 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
     public class SubscriptionPersister : ISubscriptionStorage, IInitializableSubscriptionStorage
     {
         private readonly IMongoCollection<Subscription> _subscriptions;
-        
+        private readonly IEnumerable<BsonDocument> _ensureIndexes = new[]
+        {
+            new BsonDocument {{nameof(Subscription.Id), 1}, {nameof(Subscription.Subscribers), 1}}
+        };
+
         public SubscriptionPersister(IMongoDatabase database)
         {
             _subscriptions = database.GetCollection<Subscription>(MongoPersistenceConstants.SubscriptionCollectionName);
@@ -21,14 +26,16 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
 
         public void Init()
         {
-            _subscriptions.Indexes.CreateOne(
-                    new IndexKeysDefinitionBuilder<Subscription>().Ascending(s => s.Id).Ascending(s => s.Subscribers));
+            foreach (var ensureIndex in _ensureIndexes)
+            {
+                _subscriptions.Indexes.EnsureIndex(ensureIndex).Wait();
+            }
         }
 
         public Task Subscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var key = GetMessageTypeKey(messageType);
-            
+
             var update = new UpdateDefinitionBuilder<Subscription>().AddToSet(s => s.Subscribers, SubscriberToString(subscriber));
 
             return _subscriptions.UpdateOneAsync(s => s.Id == key, update, new UpdateOptions() { IsUpsert = true });
@@ -41,13 +48,13 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
 
         private static SubscriptionKey GetMessageTypeKey(MessageType messageType)
         {
-            return new SubscriptionKey {TypeName = messageType.TypeName, Version = messageType.Version.Major.ToString()};
+            return new SubscriptionKey { TypeName = messageType.TypeName, Version = messageType.Version.Major.ToString() };
         }
 
         public Task Unsubscribe(Subscriber subscriber, MessageType messageType, ContextBag context)
         {
             var key = GetMessageTypeKey(messageType);
-            
+
             var subscriberName = SubscriberToString(subscriber);
 
             var update = new UpdateDefinitionBuilder<Subscription>().Pull(s => s.Subscribers, subscriberName);
@@ -60,7 +67,7 @@ namespace NServiceBus.Persistence.MongoDB.Subscriptions
             var keys = GetMessageTypeKeys(messageTypes);
 
             var subscriptions = await _subscriptions.Find(s => keys.Contains(s.Id)).ToListAsync().ConfigureAwait(false);
-            
+
             return subscriptions
                 .SelectMany(s => s.Subscribers)
                 .Distinct()

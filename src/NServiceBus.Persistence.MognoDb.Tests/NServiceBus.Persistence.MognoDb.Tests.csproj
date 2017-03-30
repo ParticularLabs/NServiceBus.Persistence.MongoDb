@@ -67,6 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\MongoFixture.cs" />
+    <Compile Include="Database\MongoTestDocument.cs" />
+    <Compile Include="Database\When_ensure_indexes_exist.cs" />
     <Compile Include="DataBus\AcceptanceTests.cs" />
     <Compile Include="DataBus\MongoFixture.cs" />
     <Compile Include="Gateway\MongoFixture.cs" />
@@ -101,6 +104,9 @@
       <Project>{b34dde97-b5f7-4fde-8144-ce0a5c886947}</Project>
       <Name>NServiceBus.Persistence.MongoDb</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

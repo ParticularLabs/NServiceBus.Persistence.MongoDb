@@ -67,7 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\MongoIndexEnsurenceManager.cs" />
     <Compile Include="Database\MongoDbStorage.cs" />
+    <Compile Include="Database\MongoIndexManagerExtensions.cs" />
     <Compile Include="DataBus\GridFsDataBus.cs" />
     <Compile Include="DataBus\MongoDbDataBus.cs" />
     <Compile Include="DataBus\MongoDbDataBusPersistence.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionPersister.cs" />
     <Compile Include="Timeout\MongoDbTimeoutStorage.cs" />
+    <Compile Include="Timeout\TimeoutEntity.cs" />
     <Compile Include="Timeout\TimeoutPersister.cs" />
   </ItemGroup>
   <ItemGroup>

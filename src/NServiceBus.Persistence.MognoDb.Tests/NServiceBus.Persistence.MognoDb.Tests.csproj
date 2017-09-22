@@ -1,120 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3B39C103-9D66-490C-AF20-CDC976F80F90}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NServiceBus.Persistence.MognoDb.Tests</RootNamespace>
-    <AssemblyName>NServiceBus.Persistence.MognoDb.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MongoDB.Bson, Version=2.4.2.27, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Bson.2.4.2\lib\net45\MongoDB.Bson.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MongoDB.Driver, Version=2.4.2.27, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Driver.2.4.2\lib\net45\MongoDB.Driver.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MongoDB.Driver.Core, Version=2.4.2.27, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MongoDB.Driver.Core.2.4.2\lib\net45\MongoDB.Driver.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NServiceBus.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NServiceBus.6.0.0\lib\net452\NServiceBus.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.6.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.6.0\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="NServiceBus" Version="7.0.0-*" />
+    <PackageReference Include="MongoDB.Driver" Version="2.*" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.*" />
+    <PackageReference Include="NUnit" Version="3.*" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="DataBus\AcceptanceTests.cs" />
-    <Compile Include="DataBus\MongoFixture.cs" />
-    <Compile Include="Gateway\MongoFixture.cs" />
-    <Compile Include="Gateway\Should_Dedupe.cs" />
-    <Compile Include="SagaPersistence\EqualityExtensions.cs" />
-    <Compile Include="SagaPersistence\MongoFixture.cs" />
-    <Compile Include="SagaPersistence\TestSaga.cs" />
-    <Compile Include="SagaPersistence\When_completing_a_saga_with_the_mongo_persister.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_an_Enum_property.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_a_concrete_class_property.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_a_date_time_property.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_inherited_property.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_entity_with_related_entities.cs" />
-    <Compile Include="SagaPersistence\When_persisting_a_saga_with_the_same_unique_property_as_a_completed_saga.cs" />
-    <Compile Include="SagaPersistence\When_updating_a_saga_without_unique_properties.cs" />
-    <Compile Include="SagaPersistence\When_updating_a_saga_with_unique_properties.cs" />
-    <Compile Include="SubscriptionPersistence\MongoFixture.cs" />
-    <Compile Include="SubscriptionPersistence\TestData.cs" />
-    <Compile Include="SubscriptionPersistence\When_listing_subscribers_for_message_types.cs" />
-    <Compile Include="SubscriptionPersistence\When_receiving_a_subscription_message.cs" />
-    <Compile Include="SubscriptionPersistence\When_receiving_a_unsubscription_message.cs" />
-    <Compile Include="SubscriptionPersistence\When_using_semantic_versioning_of_messages.cs" />
-    <Compile Include="TimeoutPersistence\MongoFixture.cs" />
-    <Compile Include="TimeoutPersistence\When_fetching_timeouts_from_storage.cs" />
+    <ProjectReference Include="..\NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj"/>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.Persistence.MongoDB\NServiceBus.Persistence.MongoDb.csproj">
-      <Project>{b34dde97-b5f7-4fde-8144-ce0a5c886947}</Project>
-      <Name>NServiceBus.Persistence.MongoDb</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

@@ -1,0 +1,21 @@
+<Project>
+
+  <PropertyGroup>
+    <PackageAuthors>rhoffman</PackageAuthors>
+    <PackageOwners>rhoffman</PackageOwners>
+    <PackageProjectUrl>https://github.com/tekmaven/NServiceBus.Persistence.MongoDb</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/tekmaven/NServiceBus.Persistence.MongoDb/LICENSE.txt</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageCopyright>Copyright 2016-$([System.DateTime]::UtcNow.ToString(yyyy)) rhoffman. All rights reserved</PackageCopyright>
+    <PackageTags>NServiceBus MongoDb Persistence</PackageTags>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePDBsInPackage</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="IncludePDBsInPackage" Condition="'$(IncludeBuildOutput)' != 'false'">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).pdb" PackagePath="lib/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

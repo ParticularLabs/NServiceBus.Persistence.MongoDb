@@ -22,7 +22,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.DataBus
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = "mongodb://localhost/NServiceBus-Persistence-MognoDb-Tests"; // hardcoded for now
 
             _client = new MongoClient(connectionString);
             _databaseName = "Test_" + DateTime.Now.Ticks.ToString(CultureInfo.InvariantCulture);

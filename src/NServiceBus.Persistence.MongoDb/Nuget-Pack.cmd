@@ -1,1 +1,0 @@
-nuget pack NServiceBus.Persistence.MongoDb.csproj -Prop Configuration=Release

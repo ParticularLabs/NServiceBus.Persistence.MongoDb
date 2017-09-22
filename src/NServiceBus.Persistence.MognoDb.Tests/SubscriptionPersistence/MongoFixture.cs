@@ -20,7 +20,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = "mongodb://localhost/NServiceBus-Persistence-MognoDb-Tests"; // hardcoded for now
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);

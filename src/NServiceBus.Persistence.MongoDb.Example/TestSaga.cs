@@ -32,7 +32,8 @@ namespace NServiceBus.Persistence.MongoDb.Example
             return returnValue;
         }
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args) => main().Wait();
+        private static async Task main()
         {
             var endpointConfiguration = new EndpointConfiguration("MongoTestEndpoint");
 

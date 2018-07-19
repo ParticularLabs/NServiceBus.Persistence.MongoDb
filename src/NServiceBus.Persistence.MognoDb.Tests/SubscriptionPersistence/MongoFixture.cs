@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -20,7 +19,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SubscriptionPersistence
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = AppConfig.MongoDB;
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);

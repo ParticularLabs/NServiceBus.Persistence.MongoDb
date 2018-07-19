@@ -1,49 +1,81 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using NServiceBus.Logging;
 using NServiceBus.Persistence.MongoDB;
+using NServiceBus.Persistence.MongoDB.DataBus;
 
 namespace NServiceBus.Persistence.MongoDb.Example
 {
-    public class TestStartup : IWantToRunWhenEndpointStartsAndStops
+    public static class TestStartup
     {
-        static ILog Logger = LogManager.GetLogger<TestStartup>();
-        
-        public Task Start(IMessageSession session)
+        private static string getTransportDirectory()
         {
-            Task.Run(async () => 
+            var assembly = Assembly.GetEntryAssembly();
+
+            var assemblyLocation = assembly.CodeBase;
+            if (assemblyLocation.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
             {
-                while (true)
-                {
-                    Logger.Info("Enter an int to send in a test message: ");
-                    
-                    int id = 0;
-                    if (Int32.TryParse(Console.ReadLine(), out id))
-                    {
-                        await session.SendLocal<TestMessage>(message =>
-                        {
-                            message.UserId = id; //console input
-                            message.Message = Guid.NewGuid().ToString(); //random text
-                            message.DataBusData = new DataBusProperty<byte[]>(new byte[1024*1024*5]); //5MB
-                        }).ConfigureAwait(false);
+                assemblyLocation = assemblyLocation.Substring(8);
+            }
 
-                        Logger.InfoFormat("Message sent with Id = {0}", id);
-                    }
-                    else
-                    {
-                        Logger.Error("Error: Console input did not parse to an int.");
-                    }
-                }
-            });
+            var returnValue = Path.Combine(Path.GetDirectoryName(assemblyLocation) ?? "", "transport");
 
-            return Task.FromResult(0);
+            if (Directory.Exists(returnValue))
+            {
+                Directory.Delete(returnValue);
+            }
+
+            Directory.CreateDirectory(returnValue);
+
+            return returnValue;
         }
-        
 
-        public Task Stop(IMessageSession session)
+        public static async Task Main(string[] args)
         {
-            return Task.FromResult(0);
+            var endpointConfiguration = new EndpointConfiguration("MongoTestEndpoint");
+
+            endpointConfiguration.UsePersistence<MongoDbPersistence>().SetConnectionString("mongodb://localhost/persistence-example");
+            endpointConfiguration.UseDataBus<MongoDbDataBus>();
+
+            var learningTransport = endpointConfiguration.UseTransport<LearningTransport>();
+            learningTransport.NoPayloadSizeRestriction();
+            learningTransport.StorageDirectory(getTransportDirectory());
+
+            endpointConfiguration.SendFailedMessagesTo("error");
+            endpointConfiguration.AuditProcessedMessagesTo("audit");
+
+            var endpoint = await Endpoint.Create(endpointConfiguration).ConfigureAwait(false);
+
+            var endpointInstance = await endpoint.Start().ConfigureAwait(false);
+
+            while (true)
+            {
+                Logger.Info("Enter an int to send in a test message: ");
+
+                if (int.TryParse(Console.ReadLine(), out var id))
+                {
+                    await endpointInstance.SendLocal<TestMessage>(message =>
+                    {
+                        message.UserId = id; //console input
+                        message.Message = Guid.NewGuid().ToString(); //random text
+                        message.DataBusData = new DataBusProperty<byte[]>(new byte[1024 * 1024 * 5]); //5MB
+                    }).ConfigureAwait(false);
+
+                    Logger.InfoFormat("Message sent with Id = {0}", id);
+                }
+                else
+                {
+                    Logger.Error("Error: Console input did not parse to an int.");
+                    break;
+                }
+            }
+
+            await endpointInstance.Stop().ConfigureAwait(false);
         }
+
+        public static readonly ILog Logger = LogManager.GetLogger("log");
     }
     public class TestMessage : IMessage
     {

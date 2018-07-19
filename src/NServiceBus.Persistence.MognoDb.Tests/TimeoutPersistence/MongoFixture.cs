@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using MongoDB.Driver;
 using NServiceBus.Persistence.MongoDB.Timeout;
@@ -17,7 +16,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.TimeoutPersistence
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = AppConfig.MongoDB;
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);

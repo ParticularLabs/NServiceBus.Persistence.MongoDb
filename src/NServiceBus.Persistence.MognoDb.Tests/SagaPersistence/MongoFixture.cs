@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -29,7 +28,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             ConventionRegistry.Register("CamelCase", camelCasePack, type => true);
             _camelCaseConventionSet = true;
 
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = AppConfig.MongoDB;
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);
@@ -53,19 +52,19 @@ namespace NServiceBus.Persistence.MognoDb.Tests.SagaPersistence
             return _sagaPersister.Save(saga, correlationProperty, null, null );
         }
 
-        protected Task<T> LoadSaga<T>(Guid id) where T : IContainSagaData
+        protected Task<T> LoadSaga<T>(Guid id) where T : class, IContainSagaData
         {
             return _sagaPersister.Get<T>(id, null, null);
         }
 
-        protected async Task CompleteSaga<T>(Guid sagaId) where T : IContainSagaData
+        protected async Task CompleteSaga<T>(Guid sagaId) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga);
             await _sagaPersister.Complete(saga, null, null).ConfigureAwait(false);
         }
 
-        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : IContainSagaData
+        protected async Task UpdateSaga<T>(Guid sagaId, Action<T> update) where T : class, IContainSagaData
         {
             var saga = await LoadSaga<T>(sagaId).ConfigureAwait(false);
             Assert.NotNull(saga, "Could not update saga. Saga not found");

@@ -11,12 +11,5 @@
       <description>MongoDB Persistence for NServiceBus.</description>
       <copyright>Copyright 2016</copyright>
       <tags>NServiceBus MongoDb Persistence</tags>
-      <dependencies>
-        <dependency id="MongoDB.Bson" version="2.4.0" />
-        <dependency id="MongoDB.Driver" version="2.4.0" />
-        <dependency id="MongoDB.Driver.Core" version="2.4.0" />
-        <dependency id="MongoDB.Driver.GridFS" version="2.4.0" />
-        <dependency id="NServiceBus" version="[6.0.0, 7.0.0)" />
-      </dependencies>
   </metadata>
 </package>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using MongoDB.Driver;
 using NServiceBus.Gateway.Deduplication;
@@ -18,7 +17,7 @@ namespace NServiceBus.Persistence.MognoDb.Tests.Gateway
         [SetUp]
         public void SetupContext()
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString;
+            var connectionString = AppConfig.MongoDB;
 
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(_databaseName);

@@ -13,7 +13,9 @@ Includes MongoDB persistence implementations for
 
 To use MongoDB for persistence
 
-snippet: MongoUsage
+```
+busConfiguration.UsePersistence<MongoDbPersistence>();
+```
 
 
 ## Connection settings
@@ -25,16 +27,27 @@ There are several ways to set the MongoDB Connection
 
 This allows resolution of configuration setting at run-time.
 
-snippet: MongoConnectionString
+```
+var persistence = busConfiguration.UsePersistence<MongoDbPersistence>();
+persistence.SetConnectionString("mongodb://localhost/databaseName");
+```
 
 
 ### Via an app.config connection string
 
-snippet: MongoConnectionStringAppConfig
+```
+<connectionStrings>
+  <add name="NServiceBus/Persistence/MongoDB"
+      connectionString="mongodb://localhost/databaseName"/>
+</connectionStrings>
+```
 
 Override the default connection string name as follows:
 
-snippet: MongoConnectionStringName
+```
+var persistence = busConfiguration.UsePersistence<MongoDbPersistence>();
+persistence.SetConnectionStringName("SharedConnectionString");
+```
 
 
 ## Saga definition guideline
@@ -46,7 +59,18 @@ For sagas to work correctly, the following must be enforced:
 
 For example:
 
-snippet: MongoSampleSaga
+```
+public class OrderBillingSagaData :
+    ContainSagaData
+{
+    public string OrderId { get; set; }
+
+    [DocumentVersion]
+    public int Version { get; set; }
+
+    public bool Canceled { get; set; }
+}
+```
 
 
 ## Dealing with concurrency

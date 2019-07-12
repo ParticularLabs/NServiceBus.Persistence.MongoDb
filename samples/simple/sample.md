@@ -1,16 +1,3 @@
----
-title: MongoDB Persistence
-summary: Using MongoDB to store sagas and timeouts.
-reviewed: 2018-09-28
-component: MongoPersistenceTekmaven
-tags:
- - Saga
- - Timeout
-related:
- - nservicebus/sagas
----
-
-
 ## Prerequisites
 
 Ensure an instance of [MongoDB](https://www.mongodb.com/) is running on `localhost:27017`. See [Install MongoDB on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
@@ -37,19 +24,76 @@ This sample shows a simple client/server scenario:
 
 The `Server` endpoint is configured to use the MongoDB persistence with a connection string of `mongodb://localhost:27017/SamplesMongoDBServer`.
 
-snippet: MongoDBConfig
+```
+var endpointConfiguration = new EndpointConfiguration("Samples.MongoDB.Server");
+var persistence = endpointConfiguration.UsePersistence<MongoDbPersistence>();
+persistence.SetConnectionString("mongodb://localhost:27017/SamplesMongoDBServer");
+```
 
 
 ### Order saga data
 
 `NServiceBus.Persistence.MongoDB` [requires a property on the saga decorated with attribute `[DocumentVersion]`](https://github.com/tekmaven/NServiceBus.Persistence.MongoDB/#saga-definition-guideline), usually named Version.
 
-snippet: sagadata
+```
+public class OrderSagaData :
+    IContainSagaData
+{
+    public Guid Id { get; set; }
+    public string Originator { get; set; }
+    public string OriginalMessageId { get; set; }
+
+    [DocumentVersion]
+    public int Version { get; set; }
+
+    public Guid OrderId { get; set; }
+    public string OrderDescription { get; set; }
+}
+```
 
 
 ### Order saga
 
-snippet: thesaga
+```
+public class OrderSaga :
+    Saga<OrderSagaData>,
+    IAmStartedByMessages<StartOrder>,
+    IHandleTimeouts<CompleteOrder>
+{
+    static ILog log = LogManager.GetLogger<OrderSaga>();
+
+    protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OrderSagaData> mapper)
+    {
+        mapper.ConfigureMapping<StartOrder>(message => message.OrderId)
+            .ToSaga(sagaData => sagaData.OrderId);
+    }
+
+    public Task Handle(StartOrder message, IMessageHandlerContext context)
+    {
+        Data.OrderId = message.OrderId;
+        var orderDescription = $"The saga for order {message.OrderId}";
+        Data.OrderDescription = orderDescription;
+        log.Info($"Received StartOrder message {Data.OrderId}. Starting Saga");
+        log.Info("Order will complete in 5 seconds");
+        var timeoutData = new CompleteOrder
+        {
+            OrderDescription = orderDescription
+        };
+        return RequestTimeout(context, TimeSpan.FromSeconds(5), timeoutData);
+    }
+
+    public Task Timeout(CompleteOrder state, IMessageHandlerContext context)
+    {
+        log.Info($"Saga with OrderId {Data.OrderId} completed");
+        var orderCompleted = new OrderCompleted
+        {
+            OrderId = Data.OrderId
+        };
+        MarkAsComplete();
+        return context.Publish(orderCompleted);
+    }
+}
+```
 
 
 ## The data in MongoDB

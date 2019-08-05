@@ -1,3 +1,5 @@
+**NOTE: This repository is no longer maintained. If you're looking for an officially supported MongoDB persistence, please use [NServiceBus.Storage.MongoDB](https://github.com/particular/nservicebus.storage.mongodb). For documentation and samples, refer to: https://docs.particular.net/persistence/mongodb/** 
+
 ## NServiceBus.Persistence.MongoDb  [![Build status](https://ci.appveyor.com/api/projects/status/9cfq3u3vd0rf4kl2/branch/master?svg=true)](https://ci.appveyor.com/project/tekmaven/nservicebus-persistence-mongodb/branch/master) [![NuGet version](https://badge.fury.io/nu/NServiceBus.Persistence.MongoDb.svg)](http://badge.fury.io/nu/NServiceBus.Persistence.MongoDb)##
 
 This package includes MongoDB persistence implementations for NServiceBus v6:
